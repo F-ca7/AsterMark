@@ -3,7 +3,7 @@ package team.aster;
 import team.aster.database.DbController;
 import team.aster.processor.WatermarkFactory;
 import team.aster.processor.WatermarkProcessor;
-import team.aster.processor.WatermarkType;
+import team.aster.processor.WatermarkProcessorType;
 
 enum Attack {
     INSERTION,
@@ -52,7 +52,7 @@ public class Simulator {
 
     private static void embedWatermark(DbController dbController){
         WatermarkFactory factory = new WatermarkFactory();
-        WatermarkProcessor wmProcessor = factory.getWatermarkProcessor(WatermarkType.OPTIMIZATION);
+        WatermarkProcessor wmProcessor = factory.getWatermarkProcessor(WatermarkProcessorType.OPTIMIZATION);
         System.out.printf("初始化%s完成\n", wmProcessor.toString());
         //向带有主主键的数据嵌入水印
         wmProcessor.encodeDB(dbController.getDatasetWithPK());

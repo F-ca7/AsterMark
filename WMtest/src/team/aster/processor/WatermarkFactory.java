@@ -13,7 +13,7 @@ public class WatermarkFactory {
      * @param watermarkType 水印类型的枚举
      * @return team.aster.processor.WatermarkProcessor
      */
-    public WatermarkProcessor getWatermarkProcessor(WatermarkType watermarkType){
+    public WatermarkProcessor getWatermarkProcessor(WatermarkProcessorType watermarkType){
 
         switch (watermarkType){
             case OPTIMIZATION:
