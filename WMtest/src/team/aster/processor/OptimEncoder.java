@@ -1,5 +1,6 @@
 package team.aster.processor;
 
+import team.aster.algorithm.GenericOptimization;
 import team.aster.model.DatasetWithPK;
 import team.aster.model.PartitionedDataset;
 
@@ -7,6 +8,23 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class OptimEncoder implements IEncoder {
+
+    ArrayList<Double> minList = new ArrayList<>();
+    ArrayList<Double> maxList = new ArrayList<>();
+    double threshold;
+
+    public ArrayList<Double> getMinList() {
+        return minList;
+    }
+
+    public ArrayList<Double> getMaxList() {
+        return maxList;
+    }
+
+    public double getThreshold() {
+        return threshold;
+    }
+
     @Override
     public void encode(DatasetWithPK datasetWithPK) {
         int partitionCount = 10;
@@ -41,8 +59,10 @@ public class OptimEncoder implements IEncoder {
         datasetWithIndex.forEach((k,v)->{
             int index = k%wmLength;
             System.out.printf("正在处理第%d个划分...\n嵌入水印位为第%d位\n", k, index);
-            encodeSingleBit(v, index);
+            encodeSingleBit(v, index, watermark[index]);
         });
+        //保存阈值T
+        threshold = GenericOptimization.calcOptimizedThreshold(minList, maxList);
     }
 
 
@@ -55,8 +75,30 @@ public class OptimEncoder implements IEncoder {
      * @param bitIndex	水印对应的bit位
      * @return void
      */
-    private void encodeSingleBit(ArrayList<ArrayList<String>> partition, int bitIndex){
-
+    private void encodeSingleBit(ArrayList<ArrayList<String>> partition, int bitIndex, int bit){
+        //先只对一列进行嵌入水印，这里是最后一列FLATLOSE 转让盈亏(已扣税)
+        //但是这里还是不太科学
+        final int COLINDEX = 13;
+        System.out.printf("正在对第%d个字段嵌入水印的第%d位-%d\n", COLINDEX+1, bitIndex, bit);
+        ArrayList<Double> colValues = new ArrayList<>();
+        for(ArrayList<String> row: partition){
+            double value = Double.valueOf(row.get(2));
+            System.out.printf("字段值为%f\n", value);
+            colValues.add(value);
+        }
+        switch (bit){
+            case 0:
+                minList.add(GenericOptimization.minimizeByHidingFunction(colValues));
+                break;
+            case 1:
+                maxList.add(GenericOptimization.maximizeByHidingFunction(colValues));
+                break;
+            default:
+                System.out.println("水印出错！");
+                break;
+        }
     }
+
+
 }
 
