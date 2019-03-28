@@ -11,6 +11,9 @@ public class OptimEncoder implements IEncoder {
 
     ArrayList<Double> minList = new ArrayList<>();
     ArrayList<Double> maxList = new ArrayList<>();
+    //先只对一列进行嵌入水印，这里是最后一列FLATLOSE 转让盈亏(已扣税)
+    //但是这里还是不太科学
+    final int COLINDEX = 13;
     double threshold;
 
     public ArrayList<Double> getMinList() {
@@ -32,6 +35,7 @@ public class OptimEncoder implements IEncoder {
 
         String secretKey = SecretCodeGenerator.getSecreteCode(10);
         PartitionedDataset partitionedDataset = Divider.divide(partitionCount, datasetWithPK, secretKey);
+        System.out.printf("预期划分数为%d，实际划分数为%d", partitionCount, partitionedDataset.getPartitionedDataset().keySet().size());
         //todo 水印生成器
         int[] watermark = {1,0,0,1,0,0,1,1};
         encodeAllBits(partitionedDataset, watermark);
@@ -63,6 +67,7 @@ public class OptimEncoder implements IEncoder {
         });
         //保存阈值T
         threshold = GenericOptimization.calcOptimizedThreshold(minList, maxList);
+        System.out.println("阈值为：" + threshold);
     }
 
 
@@ -76,14 +81,12 @@ public class OptimEncoder implements IEncoder {
      * @return void
      */
     private void encodeSingleBit(ArrayList<ArrayList<String>> partition, int bitIndex, int bit){
-        //先只对一列进行嵌入水印，这里是最后一列FLATLOSE 转让盈亏(已扣税)
-        //但是这里还是不太科学
-        final int COLINDEX = 13;
-        System.out.printf("正在对第%d个字段嵌入水印的第%d位-%d\n", COLINDEX+1, bitIndex, bit);
+
+        System.out.printf("正在对第%d个字段嵌入水印的第%d位: %d\n", COLINDEX+1, bitIndex, bit);
         ArrayList<Double> colValues = new ArrayList<>();
         for(ArrayList<String> row: partition){
-            double value = Double.valueOf(row.get(2));
-            System.out.printf("字段值为%f\n", value);
+            double value = Double.valueOf(row.get(COLINDEX));
+            //System.out.printf("字段值为%f\n", value);
             colValues.add(value);
         }
         switch (bit){

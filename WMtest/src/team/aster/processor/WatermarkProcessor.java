@@ -15,4 +15,12 @@ public abstract class WatermarkProcessor {
 
         return decoder.decode(datasetWithPK);
     }
+
+    public IEncoder getEncoder() {
+        return encoder;
+    }
+
+    public IDecoder getDecoder() {
+        return decoder;
+    }
 }

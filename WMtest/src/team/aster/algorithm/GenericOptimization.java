@@ -1,6 +1,8 @@
 package team.aster.algorithm;
 
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math.random.RandomData;
+import org.apache.commons.math.random.RandomDataImpl;
+import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
 import java.util.ArrayList;
 
@@ -42,11 +44,12 @@ public class GenericOptimization {
         double minVar = minStats.getVariance();
         double maxVar = maxStats.getVariance();
 
-        double minMeanSquare = minMean*minMean;
-        double maxMeanSquare = maxMean*maxMean;
 
         double minSize = (double) minList.size();
         double maxSize = (double) maxList.size();
+
+        System.out.printf("min均值：%f, 方差：%f\n", minMean, minVar);
+        System.out.printf("max均值：%f, 方差：%f\n", maxMean, maxVar);
         //bit为0的概率
         double p0 = minSize/(minSize+maxSize);
         //bit为0的概率
@@ -62,14 +65,18 @@ public class GenericOptimization {
     }
 
 
-
+    //todo 临时模拟
     public static double maximizeByHidingFunction(ArrayList<Double> colValues){
-        return 0;
+        RandomData randomData = new RandomDataImpl();
+
+        return randomData.nextGaussian(2000,50);
     }
 
-
+    //todo 临时模拟
     public static double minimizeByHidingFunction(ArrayList<Double> colValues){
-        return 0;
+        RandomData randomData = new RandomDataImpl();
+
+        return randomData.nextGaussian(500,30);
     }
 
 

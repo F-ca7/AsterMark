@@ -10,15 +10,20 @@ public class DbController {
     private Connection conn;
     //要操作的表
     private String dbName;
+
     private String tableName;
     private ArrayList<ArrayList<String>> dataset;
     private DatasetWithPK datasetWithPK;
 
-    private final int FETCH_COUNT = 10;
+    private final int FETCH_COUNT = 1000;
 
 
     public int getFETCH_COUNT() {
         return FETCH_COUNT;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
 
@@ -60,7 +65,7 @@ public class DbController {
                 for(int i=0; i<colCount; i++){
                     //这里的index从1开始
                     String data = rs.getString(i+1);
-                    tmpList.add(rs.getString(i+1));
+                    tmpList.add(data);
 
                 }
                 String pk = rs.getString(pkField1) + rs.getString(pkField2);
@@ -74,6 +79,30 @@ public class DbController {
 
     public DatasetWithPK getDatasetWithPK(){
         return datasetWithPK;
+    }
+
+
+    public void randomDeletion(double deletionPercent){
+        String queryCountSql = String.format("SELECT COUNT(*) FROM %s", tableName);
+
+        int rowCount = 0;
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(queryCountSql);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()){
+                rowCount = rs.getInt(1);
+            }
+            System.out.printf("表%s共%d行\n", tableName, rowCount);
+            int deletionCount = (int)((double)rowCount*deletionPercent);
+            System.out.printf("随机删除%d条数据\n", deletionCount);
+            String deletionSql = String.format("DELETE FROM %s ORDER BY rand() LIMIT %d", tableName, deletionCount);
+            pstmt = conn.prepareStatement(deletionSql);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     //仅用于小规模调试
@@ -94,6 +123,8 @@ public class DbController {
         }
     }
 
+
+
     private void connectDB() {
         //mysql配置信息
         final String DRIVER_NAME = "com.mysql.jdbc.Driver";
@@ -104,7 +135,7 @@ public class DbController {
 
         try {
             Class.forName(DRIVER_NAME);
-            conn = DriverManager.getConnection(URL + dbName, USERNAME, PASSWORD);
+            conn = DriverManager.getConnection(URL + dbName+"?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai", USERNAME, PASSWORD);
 
         } catch (ClassNotFoundException e) {
             //todo 后期改用日志log打印
