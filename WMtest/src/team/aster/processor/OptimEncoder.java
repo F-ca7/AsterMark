@@ -1,14 +1,16 @@
 package team.aster.processor;
 
 import team.aster.algorithm.GenericOptimization;
+import team.aster.database.SecretKeyDbController;
 import team.aster.model.DatasetWithPK;
 import team.aster.model.PartitionedDataset;
+import team.aster.model.StoredKey;
+import team.aster.model.WaterMark;
 
 import java.util.ArrayList;
 import java.util.Map;
 
 public class OptimEncoder implements IEncoder {
-
     ArrayList<Double> minList = new ArrayList<>();
     ArrayList<Double> maxList = new ArrayList<>();
     //先只对一列进行嵌入水印，这里是最后一列FLATLOSE 转让盈亏(已扣税)
@@ -29,16 +31,37 @@ public class OptimEncoder implements IEncoder {
     }
 
     @Override
-    public void encode(DatasetWithPK datasetWithPK) {
-        int partitionCount = 10;
+    public void encode(DatasetWithPK datasetWithPK, ArrayList<String> watermarkList) {
+        int partitionCount = 100;
         System.out.println(this.toString()+"开始工作");
 
-        String secretKey = SecretCodeGenerator.getSecreteCode(10);
-        PartitionedDataset partitionedDataset = Divider.divide(partitionCount, datasetWithPK, secretKey);
-        System.out.printf("预期划分数为%d，实际划分数为%d", partitionCount, partitionedDataset.getPartitionedDataset().keySet().size());
+        String secreteCode = SecretCodeGenerator.getSecreteCode(10);
+        PartitionedDataset partitionedDataset = Divider.divide(partitionCount, datasetWithPK, secreteCode);
+        System.out.printf("预期划分数为%d，实际划分数为%d\n", partitionCount, partitionedDataset.getPartitionedDataset().keySet().size());
+
+
         //todo 水印生成器
-        int[] watermark = {1,0,0,1,0,0,1,1};
-        encodeAllBits(partitionedDataset, watermark);
+        WaterMark waterMark = WaterMarkGenerator.getWaterMark(watermarkList);
+
+        encodeAllBits(partitionedDataset, waterMark.getBinary());
+
+        System.out.println("maxList:");
+        maxList.forEach(ele->{
+            System.out.printf("%f, ", ele);
+        });
+        System.out.println("\nminList:");
+        minList.forEach(ele->{
+            System.out.printf("%f, ", ele);
+        });
+        //正在保存水印信息
+        StoredKey storedKey = new StoredKey.Builder()
+                .setDbTable("exp_wm::transaction_2013").setMinLength(50)
+                .setSecretKey(0.3).setThreshold(threshold)
+                .setTarget("Tencent").setPartitionCount(partitionCount)
+                .setWaterMark(waterMark).setWmLength(waterMark.getLength())
+                .setSecretCode(secreteCode)
+                .build();
+        SecretKeyDbController.saveStoredKeysToDB(storedKey);
     }
 
 
@@ -56,14 +79,14 @@ public class OptimEncoder implements IEncoder {
      * @param watermark	    要水印串
      * @return void
      */
-    private void encodeAllBits(PartitionedDataset partitionedDataset, int[] watermark){
+    private void encodeAllBits(PartitionedDataset partitionedDataset, ArrayList<Integer> watermark){
         System.out.println("开始嵌入水印所有位");
         Map<Integer, ArrayList<ArrayList<String>>> datasetWithIndex = partitionedDataset.getPartitionedDataset();
-        int wmLength = watermark.length;
+        int wmLength = watermark.size();
         datasetWithIndex.forEach((k,v)->{
             int index = k%wmLength;
             System.out.printf("正在处理第%d个划分...\n嵌入水印位为第%d位\n", k, index);
-            encodeSingleBit(v, index, watermark[index]);
+            encodeSingleBit(v, index, watermark.get(index));
         });
         //保存阈值T
         threshold = GenericOptimization.calcOptimizedThreshold(minList, maxList);

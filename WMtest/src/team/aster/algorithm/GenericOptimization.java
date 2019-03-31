@@ -6,7 +6,7 @@ import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
 import java.util.ArrayList;
 
-public class GenericOptimization {
+public final class GenericOptimization {
 
 
     /**
@@ -39,11 +39,11 @@ public class GenericOptimization {
         DescriptiveStatistics maxStats = new DescriptiveStatistics();
         minList.forEach(minStats::addValue);
         maxList.forEach(maxStats::addValue);
+
         double minMean = minStats.getMean();
         double maxMean = maxStats.getMean();
         double minVar = minStats.getVariance();
         double maxVar = maxStats.getVariance();
-
 
         double minSize = (double) minList.size();
         double maxSize = (double) maxList.size();
@@ -61,7 +61,13 @@ public class GenericOptimization {
         double tmpC = (p0*Math.sqrt(maxVar))/(p1*Math.sqrt(minVar));
         double C = minVar*maxVar*Math.log(tmpC) + (maxMean*maxMean*minVar - minMean*minMean*maxVar)/2;
 
-        return getLargerRootForQuad(A, B, C);
+        //判断二次项系数是否为0
+        if (Math.abs(minVar - maxVar)<1e-6){
+            return getRootForLinear(B, C);
+        }else {
+            return getSmallerRootForQuad(A, B, C);
+        }
+
     }
 
 
@@ -69,14 +75,14 @@ public class GenericOptimization {
     public static double maximizeByHidingFunction(ArrayList<Double> colValues){
         RandomData randomData = new RandomDataImpl();
 
-        return randomData.nextGaussian(2000,50);
+        return randomData.nextGaussian(0.5,0.01);
     }
 
     //todo 临时模拟
     public static double minimizeByHidingFunction(ArrayList<Double> colValues){
         RandomData randomData = new RandomDataImpl();
 
-        return randomData.nextGaussian(500,30);
+        return randomData.nextGaussian(0.2,0.02);
     }
 
 
@@ -89,9 +95,12 @@ public class GenericOptimization {
      * @param C
      * @return double
      */
-    private static double getLargerRootForQuad(double A, double B, double C){
-        return ((-B + Math.sqrt(B*B - 4*A*C))/(2*A));
+    private static double getSmallerRootForQuad(double A, double B, double C){
+        return ((-B - Math.sqrt(B*B - 4*A*C))/(2*A));
     }
 
 
+    private static double getRootForLinear(double A, double B){
+        return (-B)/A;
+    }
 }

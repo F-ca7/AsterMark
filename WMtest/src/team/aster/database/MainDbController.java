@@ -5,7 +5,7 @@ import team.aster.model.DatasetWithPK;
 import java.sql.*;
 import java.util.ArrayList;
 
-public class DbController {
+public class MainDbController {
 
     private Connection conn;
     //要操作的表
@@ -15,8 +15,8 @@ public class DbController {
     private ArrayList<ArrayList<String>> dataset;
     private DatasetWithPK datasetWithPK;
 
-    private final int FETCH_COUNT = 1000;
-
+    private final int FETCH_COUNT = 10000;
+    final String CONN_PARAM = "?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai";
 
     public int getFETCH_COUNT() {
         return FETCH_COUNT;
@@ -28,7 +28,7 @@ public class DbController {
 
 
 
-    public DbController(String dbName, String tableName){
+    public MainDbController(String dbName, String tableName){
         this.dbName = dbName;
         this.tableName = tableName;
         this.dataset = new ArrayList<>();
@@ -105,6 +105,9 @@ public class DbController {
 
     }
 
+
+
+
     //仅用于小规模调试
     public void printDataset(){
         for (ArrayList<String> row:dataset) {
@@ -135,19 +138,19 @@ public class DbController {
 
         try {
             Class.forName(DRIVER_NAME);
-            conn = DriverManager.getConnection(URL + dbName+"?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai", USERNAME, PASSWORD);
+            conn = DriverManager.getConnection(URL + dbName + CONN_PARAM, USERNAME, PASSWORD);
 
         } catch (ClassNotFoundException e) {
             //todo 后期改用日志log打印
             System.out.println("找不到驱动");
             e.printStackTrace();
         } catch (SQLException e) {
+            System.out.println("SQL错误");
             e.printStackTrace();
-        }catch (Exception e){
+        } catch (Exception e){
             e.printStackTrace();
         }
     }
-
 
 
 

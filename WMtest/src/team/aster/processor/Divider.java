@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * @author kun
  * 对数据集进行划分
  */
-public class Divider {
+class Divider {
 	private static int M = 65535;//字符串Hashcode分布范围
 	
 	/****
@@ -50,7 +50,9 @@ public class Divider {
 		int result = BKDRHash(tmp.toCharArray());
 		return result;
 	}
-	
+
+
+	//todo 用stream API做并行优化
 	/****
 	 * 数据集划分
 	 * @param m 分组数
@@ -58,7 +60,7 @@ public class Divider {
 	 * @param secretCode 密钥
 	 * @return 划分后的数据集map，Map类型，key为划分集合下标，value为ArrayList，包含该集合下所有列数据（类型为ArrayList）
 	 */
-	public static PartitionedDataset divide(int m, DatasetWithPK data, String secretCode){
+	static PartitionedDataset divide(int m, DatasetWithPK data, String secretCode){
 		PartitionedDataset partitionedDataset = new PartitionedDataset();
 		for(String key:data.getDataset().keySet()) {
 			int mac = getMac(key,secretCode);
