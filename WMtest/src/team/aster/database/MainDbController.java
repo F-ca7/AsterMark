@@ -18,7 +18,6 @@ public class MainDbController {
     private int fetchCount = 1000;
     private ArrayList<ArrayList<String>> dataset;
     private DatasetWithPK datasetWithPK;
-    private final static String CONN_PARAM = Constants.MysqlDbConfig.CONN_PARAM;
 
 
     public void setTableName(String tableName) {
@@ -205,16 +204,15 @@ public class MainDbController {
 
     private void connectDB() {
         //mysql配置信息
-        final String DRIVER_NAME = "com.mysql.jdbc.Driver";
-        final String URL = "jdbc:mysql://localhost:3306/";
-
-        final String USERNAME = "root";
-        final String PASSWORD = "0000";
-
         try {
+            String DRIVER_NAME = Constants.MysqlDbConfig.DRIVER_NAME;
+            String URL = Constants.MysqlDbConfig.URL;
+            String USERNAME = Constants.MysqlDbConfig.USERNAME;
+            String PASSWORD = Constants.MysqlDbConfig.PASSWORD;
+            String CONN_PARAM = Constants.MysqlDbConfig.CONN_PARAM;
+
             Class.forName(DRIVER_NAME);
             conn = DriverManager.getConnection(URL + dbName + CONN_PARAM, USERNAME, PASSWORD);
-
         } catch (ClassNotFoundException e) {
             //todo 后期改用日志log打印
             System.out.println("找不到驱动");

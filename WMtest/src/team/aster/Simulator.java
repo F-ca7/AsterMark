@@ -24,19 +24,18 @@ public class Simulator {
 
 
     public static void main(String[] args){
-//        //初始化数据库
+        //初始化数据库
         MainDbController dbController = initDatabase();
-//
-//        //使用基于最优化算法的水印嵌入
+
+        //使用基于最优化算法的水印嵌入
         WatermarkFactory factory = new WatermarkFactory();
         WatermarkProcessor wmProcessor = factory.getWatermarkProcessor(WatermarkProcessorType.OPTIMIZATION);
         System.out.printf("初始化%s完成%n", wmProcessor.toString());
-//
-//        //嵌入水印
+
+        //嵌入水印
         embedWatermark(dbController, wmProcessor.getEncoder());
-//
-//
-//        //发布数据集
+
+        //发布数据集
         publishTable(dbController);
 
         //模拟攻击
@@ -67,12 +66,13 @@ public class Simulator {
 
     private static MainDbController initDatabase(){
         System.out.println("开始初始化数据库...");
+        //初始化数据库
         MainDbController dbController = new MainDbController(DB_NAME, EMBED_TABLE_NAME);
         dbController.setFetchCount(FETCH_COUNT);
         dbController.setPublishTableName(PUBLISHED_TABLE_NAME);
         System.out.println("连接数据库成功");
-        System.out.println("开始获取数据集");
 
+        System.out.println("开始获取数据集");
         startTime = System.currentTimeMillis();
         dbController.fetchDataset();
         endTime = System.currentTimeMillis();
@@ -86,7 +86,7 @@ public class Simulator {
     private static void embedWatermark(MainDbController dbController, IEncoder encoder){
         System.out.println("开始嵌入水印...");
         startTime = System.currentTimeMillis();
-        //向带有主主键的数据嵌入水印
+        //向带有主键的数据嵌入水印
         encoder.encode(dbController.getDatasetWithPK(), SecretKeyDbController.getInstance().getWatermarkListByDbTable(getDbTableName()));
         endTime = System.currentTimeMillis();
         System.out.println("嵌入水印完成");

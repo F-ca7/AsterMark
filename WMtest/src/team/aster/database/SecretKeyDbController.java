@@ -66,15 +66,13 @@ public class SecretKeyDbController {
             ResultSet rs = pstmt.executeQuery();
             //移动cursor到最后一行
             rs.last();
-            while (rs.next()){
-                storedKey = new StoredKey.Builder().
-                        setSecretKey(rs.getDouble("secretKey")).
-                        setSecretCode(rs.getString("secretCode")).
-                        setWmLength(rs.getInt("wm_length")).
-                        setMinLength(rs.getInt("min_length")).
-                        setPartitionCount(rs.getInt("partition_count")).
-                        setThreshold(rs.getDouble("threshold")).build();
-            }
+            storedKey = new StoredKey.Builder().
+                    setSecretKey(rs.getDouble("secretKey")).
+                    setSecretCode(rs.getString("secretCode")).
+                    setWmLength(rs.getInt("wm_length")).
+                    setMinLength(rs.getInt("min_length")).
+                    setPartitionCount(rs.getInt("partition_count")).
+                    setThreshold(rs.getDouble("threshold")).build();
         } catch (SQLException e) {
             e.printStackTrace();
         }
