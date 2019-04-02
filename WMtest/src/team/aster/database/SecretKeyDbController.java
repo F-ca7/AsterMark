@@ -2,6 +2,7 @@ package team.aster.database;
 
 import team.aster.model.StoredKey;
 import team.aster.utils.BinaryUtils;
+import team.aster.utils.Constants;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -15,13 +16,13 @@ import java.util.ArrayList;
  */
 public class SecretKeyDbController {
 
-    private final static String DRIVER_NAME = "com.mysql.jdbc.Driver";
-    private final static String DB_NAME = "wm_exp";
-    private final static String TABLE_NAME = "stored_key";
-    private final static String URL = "jdbc:mysql://localhost:3306/";
-    private final static String CONN_PARAM = "?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai";
-    private final static String USERNAME = "root";
-    private final static String PASSWORD = "0000";
+    private final static String DRIVER_NAME = Constants.MysqlDbConfig.DRIVER_NAME;
+    private final static String DB_NAME = Constants.MysqlDbConfig.STORED_KEY_DB_NAME;
+    private final static String TABLE_NAME = Constants.StoredKeyDbInfo.STORED_KEY_TABLE_NAME;
+    private final static String URL = Constants.MysqlDbConfig.URL;
+    private final static String CONN_PARAM = Constants.MysqlDbConfig.CONN_PARAM;
+    private final static String USERNAME = Constants.MysqlDbConfig.USERNAME;
+    private final static String PASSWORD = Constants.MysqlDbConfig.PASSWORD;
     private Connection conn = null;
 
     //饿汉式加载
@@ -63,6 +64,8 @@ public class SecretKeyDbController {
         try {
             pstmt = conn.prepareStatement(querySql);
             ResultSet rs = pstmt.executeQuery();
+            //移动cursor到最后一行
+            rs.last();
             while (rs.next()){
                 storedKey = new StoredKey.Builder().
                         setSecretKey(rs.getDouble("secretKey")).

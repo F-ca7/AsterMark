@@ -4,6 +4,7 @@ import team.aster.algorithm.GenericOptimization;
 import team.aster.model.DatasetWithPK;
 import team.aster.model.PartitionedDataset;
 import team.aster.model.StoredKey;
+import team.aster.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -18,7 +19,7 @@ public class OptimDecoder implements IDecoder {
     private int minLength;
     //先只对一列进行嵌入水印解码，这里是最后一列FLATLOSE 转让盈亏(已扣税)
     //但是由于列之间的约束，这里还是不太科学
-    private static final int COL_INDEX = 14;
+    private static final int COL_INDEX = Constants.EmbedDbInfo.EMBED_COL_INDEX-1;
 
     public int getPartitionCount() {
         return partitionCount;

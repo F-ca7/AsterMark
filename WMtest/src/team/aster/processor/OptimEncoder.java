@@ -8,6 +8,7 @@ import team.aster.model.DatasetWithPK;
 import team.aster.model.PartitionedDataset;
 import team.aster.model.StoredKey;
 import team.aster.model.WaterMark;
+import team.aster.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -17,10 +18,10 @@ public class OptimEncoder implements IEncoder {
     ArrayList<Double> maxList = new ArrayList<>();
     //先只对一列进行嵌入水印，这里是最后一列FLATLOSE 转让盈亏(已扣税)
     //但是这里还是不太科学
-    private static final int COL_INDEX = 14;
+    private static final int COL_INDEX = Constants.EmbedDbInfo.EMBED_COL_INDEX-1;
     private static final int MIN_PART_LENGTH = 10;
     private static final double SECRET_KEY = 0.1;
-    double threshold;
+    private double threshold;
 
     public ArrayList<Double> getMinList() {
         return minList;
@@ -50,6 +51,7 @@ public class OptimEncoder implements IEncoder {
         //生成水印
         WaterMark waterMark = WaterMarkGenerator.getWaterMark(watermarkList);
 
+        assert waterMark != null;
         encodeAllBits(partitionedDataset, waterMark.getBinary());
 
         //打印maxList和minList

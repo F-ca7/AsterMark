@@ -4,6 +4,7 @@ import team.aster.database.MainDbController;
 import team.aster.database.SecretKeyDbController;
 import team.aster.model.StoredKey;
 import team.aster.processor.*;
+import team.aster.utils.Constants;
 
 enum Attack {
     INSERTION,
@@ -12,10 +13,12 @@ enum Attack {
 }
 
 public class Simulator {
-    private final static String DB_NAME = "wm_exp";
-    private final static String EMBED_TABLE_NAME = "transaction_2013";
-    private final static String PUBLISHED_TABLE_NAME = "transaction_2013_published";
-    private final static String KEYSTORE_TABLE_NAME = "stored_key";
+
+    private final static String DB_NAME = Constants.MysqlDbConfig.EMBED_DB_NAME;
+    private final static String EMBED_TABLE_NAME = Constants.EmbedDbInfo.EMBED_TABLE_NAME;
+    private final static String PUBLISHED_TABLE_NAME = Constants.PublishDbInfo.EMBED_TABLE_NAME;
+    private final static int FETCH_COUNT = Constants.EmbedDbInfo.FETCH_COUNT;
+
     private static long startTime;
     private static long endTime;
 
@@ -27,14 +30,14 @@ public class Simulator {
 //        //使用基于最优化算法的水印嵌入
         WatermarkFactory factory = new WatermarkFactory();
         WatermarkProcessor wmProcessor = factory.getWatermarkProcessor(WatermarkProcessorType.OPTIMIZATION);
-//        System.out.printf("初始化%s完成%n", wmProcessor.toString());
+        System.out.printf("初始化%s完成%n", wmProcessor.toString());
 //
 //        //嵌入水印
-//        embedWatermark(dbController, wmProcessor.getEncoder());
+        embedWatermark(dbController, wmProcessor.getEncoder());
 //
 //
 //        //发布数据集
-//        publishTable(dbController);
+        publishTable(dbController);
 
         //模拟攻击
         //simulateAttack(dbController, Attack.DELETION);
@@ -58,13 +61,14 @@ public class Simulator {
         dbController.publishDataset();
         endTime = System.currentTimeMillis();
         System.out.println("数据表发布成功！");
-        System.out.printf("发布%d条数据所用耗时： %d ms%n",  dbController.getFETCH_COUNT(),(endTime - startTime) );
+        System.out.printf("发布%d条数据所用耗时： %d ms%n",  dbController.getFetchCount(),(endTime - startTime) );
     }
 
 
     private static MainDbController initDatabase(){
         System.out.println("开始初始化数据库...");
         MainDbController dbController = new MainDbController(DB_NAME, EMBED_TABLE_NAME);
+        dbController.setFetchCount(FETCH_COUNT);
         dbController.setPublishTableName(PUBLISHED_TABLE_NAME);
         System.out.println("连接数据库成功");
         System.out.println("开始获取数据集");
@@ -73,7 +77,7 @@ public class Simulator {
         dbController.fetchDataset();
         endTime = System.currentTimeMillis();
 
-        System.out.printf("获取%d条数据集耗时： %d ms%n", dbController.getFETCH_COUNT(), (endTime - startTime));
+        System.out.printf("获取%d条数据集耗时： %d ms%n", dbController.getFetchCount(), (endTime - startTime));
         //dbController.printDatasetWithPK();
         return dbController;
     }
@@ -123,8 +127,7 @@ public class Simulator {
         //设置解码时的参数
         OptimDecoder optimDecoder = (OptimDecoder) decoder;
         optimDecoder.setStoredKeyParams(storedKey);
-        String watermark = optimDecoder.decode(dbController.getPublishedDatasetWithPK());
-        return watermark;
+        return optimDecoder.decode(dbController.getPublishedDatasetWithPK());
     }
 
     private static String identifyOrigin(String dbTable, String watermark){

@@ -1,39 +1,41 @@
 package team.aster.database;
 
 import team.aster.model.DatasetWithPK;
+import team.aster.utils.Constants;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Map;
 
 public class MainDbController {
-
     private Connection conn;
+
     //要操作的表
     private String dbName;
+    private String originTableName;     //源表名
+    private String publishTableName;    //发布表名
 
-    private String originTableName;
-
-
-    private String publishTableName;
-
+    private int fetchCount = 1000;
     private ArrayList<ArrayList<String>> dataset;
     private DatasetWithPK datasetWithPK;
+    private final static String CONN_PARAM = Constants.MysqlDbConfig.CONN_PARAM;
 
-    private static final int FETCH_COUNT = 1000;
-    private static final String CONN_PARAM = "?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai";
-
-    public int getFETCH_COUNT() {
-        return FETCH_COUNT;
-    }
 
     public void setTableName(String tableName) {
         this.originTableName = tableName;
     }
 
-
     public void setPublishTableName(String publishTableName) {
         this.publishTableName = publishTableName;
+    }
+
+
+    public void setFetchCount(int fetchCount) {
+        this.fetchCount = fetchCount;
+    }
+
+    public int getFetchCount() {
+        return fetchCount;
     }
 
     public MainDbController(String dbName, String tableName){
@@ -57,7 +59,7 @@ public class MainDbController {
             System.out.println("尚未连接数据库!");
             return;
         }
-        String querySql = String.format("SELECT * FROM %s LIMIT %d", originTableName, FETCH_COUNT);
+        String querySql = String.format("SELECT * FROM %s LIMIT %d", originTableName, fetchCount);
         try {
             PreparedStatement pstmt = conn.prepareStatement(querySql);
             ResultSet rs = pstmt.executeQuery();
@@ -68,7 +70,7 @@ public class MainDbController {
             while (rs.next()){
                 ArrayList<String> tmpList = new ArrayList<>(colCount);
                 for(int i=0; i<colCount; i++){
-                    //这里的index从2开始，跳过id
+                    //这里的index从1开始，包括id
                     String data = rs.getString(i+1);
                     tmpList.add(data);
 
