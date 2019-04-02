@@ -1,6 +1,8 @@
 package team.aster.processor;
 
 import team.aster.algorithm.GenericOptimization;
+import team.aster.algorithm.OptimizationAlgorithm;
+import team.aster.algorithm.PatternSearch;
 import team.aster.database.SecretKeyDbController;
 import team.aster.model.DatasetWithPK;
 import team.aster.model.PartitionedDataset;
@@ -15,7 +17,9 @@ public class OptimEncoder implements IEncoder {
     ArrayList<Double> maxList = new ArrayList<>();
     //先只对一列进行嵌入水印，这里是最后一列FLATLOSE 转让盈亏(已扣税)
     //但是这里还是不太科学
-    final int COLINDEX = 13;
+    private static final int COL_INDEX = 14;
+    private static final int MIN_PART_LENGTH = 10;
+    private static final double SECRET_KEY = 0.1;
     double threshold;
 
     public ArrayList<Double> getMinList() {
@@ -36,32 +40,46 @@ public class OptimEncoder implements IEncoder {
         System.out.println(this.toString()+"开始工作");
 
         String secreteCode = SecretCodeGenerator.getSecreteCode(10);
+
+        //对datasetWithPK进行划分
         PartitionedDataset partitionedDataset = Divider.divide(partitionCount, datasetWithPK, secreteCode);
-        System.out.printf("预期划分数为%d，实际划分数为%d\n", partitionCount, partitionedDataset.getPartitionedDataset().keySet().size());
+
+        System.out.printf("预期划分数为%d，实际划分数为%d%n", partitionCount, partitionedDataset.getPartitionedDataset().keySet().size());
 
 
-        //todo 水印生成器
+        //生成水印
         WaterMark waterMark = WaterMarkGenerator.getWaterMark(watermarkList);
 
         encodeAllBits(partitionedDataset, waterMark.getBinary());
 
+        //打印maxList和minList
         System.out.println("maxList:");
-        maxList.forEach(ele->{
-            System.out.printf("%f, ", ele);
-        });
-        System.out.println("\nminList:");
-        minList.forEach(ele->{
-            System.out.printf("%f, ", ele);
-        });
-        //正在保存水印信息
+        System.out.println(maxList);
+        System.out.println("minList:");
+        System.out.println(minList);
+
+        //保存水印信息
         StoredKey storedKey = new StoredKey.Builder()
-                .setDbTable("exp_wm::transaction_2013").setMinLength(50)
-                .setSecretKey(0.3).setThreshold(threshold)
+                .setDbTable("wm_exp::transaction_2013").setMinLength(MIN_PART_LENGTH)
+                .setSecretKey(SECRET_KEY).setThreshold(threshold)
                 .setTarget("Tencent").setPartitionCount(partitionCount)
                 .setWaterMark(waterMark).setWmLength(waterMark.getLength())
                 .setSecretCode(secreteCode)
                 .build();
-        SecretKeyDbController.saveStoredKeysToDB(storedKey);
+        SecretKeyDbController.getInstance().saveStoredKeysToDB(storedKey);
+
+        //更新数据
+        Map<String, ArrayList<String>> ds = datasetWithPK.getDataset();
+        //先清空原来的datasetWithPK
+        ds.clear();
+        //把partitionedDataset更新回datasetWithPK，主键为每行的第一列(id)
+        for(ArrayList<ArrayList<String>> rowSet: partitionedDataset.getPartitionedDataset().values()){
+            for (ArrayList<String> row : rowSet){
+                ds.put(row.get(0), row);
+            }
+        }
+
+
     }
 
 
@@ -77,7 +95,6 @@ public class OptimEncoder implements IEncoder {
      * @date 2019/3/24 16:47
      * @param partitionedDataset    整个划分好的数据集
      * @param watermark	    要水印串
-     * @return void
      */
     private void encodeAllBits(PartitionedDataset partitionedDataset, ArrayList<Integer> watermark){
         System.out.println("开始嵌入水印所有位");
@@ -105,24 +122,43 @@ public class OptimEncoder implements IEncoder {
      */
     private void encodeSingleBit(ArrayList<ArrayList<String>> partition, int bitIndex, int bit){
 
-        System.out.printf("正在对第%d个字段嵌入水印的第%d位: %d\n", COLINDEX+1, bitIndex, bit);
+        System.out.printf("正在对第%d个字段嵌入水印的第%d位: %d%n", COL_INDEX +1, bitIndex, bit);
         ArrayList<Double> colValues = new ArrayList<>();
         for(ArrayList<String> row: partition){
-            double value = Double.valueOf(row.get(COLINDEX));
+            double value = Double.valueOf(row.get(COL_INDEX));
             //System.out.printf("字段值为%f\n", value);
             colValues.add(value);
         }
+        OptimizationAlgorithm optimization = new PatternSearch();
+        double tmp;
         switch (bit){
             case 0:
-                minList.add(GenericOptimization.minimizeByHidingFunction(colValues));
+                tmp = optimization.minimizeByHidingFunction(colValues,
+                        OptimizationAlgorithm.getHidingValue(colValues, 0.3), -300,300);
+                minList.add(tmp);
                 break;
             case 1:
-                maxList.add(GenericOptimization.maximizeByHidingFunction(colValues));
+                tmp = optimization.maximizeByHidingFunction(colValues,
+                        OptimizationAlgorithm.getHidingValue(colValues, 0.3), -300,300);
+                maxList.add(tmp);
                 break;
             default:
                 System.out.println("水印出错！");
                 break;
         }
+
+        ArrayList<Double> modifiedCol = optimization.getModifiedColumn();
+
+        //写回partition
+        int rowIndex = 0;
+        String resultStr;
+        for(ArrayList<String> row: partition){
+            resultStr = String.format("%.2f", modifiedCol.get(rowIndex));
+            System.out.println("将原来的"+row.get(COL_INDEX)+"改为"+resultStr);
+            row.set(COL_INDEX, resultStr);
+            rowIndex++;
+        }
+
     }
 
 

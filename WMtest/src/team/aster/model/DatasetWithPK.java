@@ -11,13 +11,16 @@ import java.util.Map;
  * @date 2019/3/24 9:08
  */
 public class DatasetWithPK {
-    Map<String, ArrayList<String>> dataset;
+    private Map<String, ArrayList<String>> dataset;
 
     public DatasetWithPK() {
         dataset = new HashMap<>();
     }
 
     public void addRecord(String pk, ArrayList<String> record) {
+//        if (dataset.containsKey(pk)){
+//            System.out.println("已存在主键！"+pk);
+//        }
         dataset.put(pk, record);
     }
 

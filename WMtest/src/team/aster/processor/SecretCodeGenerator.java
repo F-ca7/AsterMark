@@ -11,7 +11,7 @@ public class SecretCodeGenerator {
 	/****
 	 * CODES 默认的密钥字符选择范围
 	 */
-	static char[] CODES=new char[]{'1','2','3','4','5','6','7','8','9','9',
+	private static char[] CODES=new char[]{'1','2','3','4','5','6','7','8','9','9',
 			'q','w','e','r','t','y','u','i','o','p','a','s','d','f','g','h','j','k','l','z','x','c','v','b','n','m'};
 	
 	/****
@@ -19,18 +19,22 @@ public class SecretCodeGenerator {
 	 * @param length 指定的密钥长度
 	 * @return 密钥
 	 */
-	public static String getSecreteCode(int length) {
+	static String getSecreteCode(int length) {
+		return getCodeString(length, CODES);
+	}
+
+	private static String getCodeString(int length, char[] codes) {
 		String code="";
 		Random r = new Random();
 		int index=0;
-		int len=CODES.length;
+		int len= codes.length;
 		for(int i=0;i<length;i++) {
 			index = r.nextInt(len);
-			code+=CODES[index];
+			code += codes[index];
 		}
 		return code;
 	}
-	
+
 	/****
 	 * 
 	 * 根据指定的密钥字符选择范围，指定长度生成密钥
@@ -39,15 +43,7 @@ public class SecretCodeGenerator {
 	 * @return 密钥
 	 */
 	public static String getSecreteCode(int length,char[] codes) {
-		String code="";
-		Random r = new Random();
-		int index=0;
-		int len=codes.length;
-		for(int i=0;i<length;i++) {
-			index = r.nextInt(len);
-			code+=codes[index];
-		}
-		return code;
+		return getCodeString(length, codes);
 	}
 	
 

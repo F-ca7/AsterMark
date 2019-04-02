@@ -4,6 +4,7 @@ import team.aster.model.DatasetWithPK;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class MainDbController {
 
@@ -11,67 +12,73 @@ public class MainDbController {
     //要操作的表
     private String dbName;
 
-    private String tableName;
+    private String originTableName;
+
+
+    private String publishTableName;
+
     private ArrayList<ArrayList<String>> dataset;
     private DatasetWithPK datasetWithPK;
 
-    private final int FETCH_COUNT = 10000;
-    final String CONN_PARAM = "?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai";
+    private static final int FETCH_COUNT = 1000;
+    private static final String CONN_PARAM = "?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai";
 
     public int getFETCH_COUNT() {
         return FETCH_COUNT;
     }
 
     public void setTableName(String tableName) {
-        this.tableName = tableName;
+        this.originTableName = tableName;
     }
 
 
+    public void setPublishTableName(String publishTableName) {
+        this.publishTableName = publishTableName;
+    }
 
     public MainDbController(String dbName, String tableName){
         this.dbName = dbName;
-        this.tableName = tableName;
+        this.originTableName = tableName;
         this.dataset = new ArrayList<>();
         this.datasetWithPK = new DatasetWithPK();
         connectDB();
     }
 
     /**
-     * @Title: fetchDataset
-     * @Description: 将要嵌入水印的表放入内存中
+     * @Description 将要嵌入水印的表放入内存中
      * @author Fcat
      * @date 2019/3/23
-     * @param
-     * @return void
      */
     public void fetchDataset(){
         //todo 后期再扩展
-        String pkField1 = "FDATE";
-        String pkField2 = "FTIME";
+        //String pkField1 = "FDATE";
+        //String pkField2 = "FTIME";
         if(conn == null){
             System.out.println("尚未连接数据库!");
             return;
         }
-        String querySql = String.format("SELECT * FROM %s LIMIT %d", tableName, FETCH_COUNT);
+        String querySql = String.format("SELECT * FROM %s LIMIT %d", originTableName, FETCH_COUNT);
         try {
             PreparedStatement pstmt = conn.prepareStatement(querySql);
             ResultSet rs = pstmt.executeQuery();
             //获取该表的总列数
             ResultSetMetaData rsMetadata = rs.getMetaData();
             int colCount = rsMetadata.getColumnCount();
-            System.out.printf("表%s共有%d个字段\n", tableName, colCount);
+            System.out.printf("表%s共有%d个字段%n", originTableName, colCount);
             while (rs.next()){
                 ArrayList<String> tmpList = new ArrayList<>(colCount);
                 for(int i=0; i<colCount; i++){
-                    //这里的index从1开始
+                    //这里的index从2开始，跳过id
                     String data = rs.getString(i+1);
                     tmpList.add(data);
 
                 }
-                String pk = rs.getString(pkField1) + rs.getString(pkField2);
+                String pk = rs.getString(1);
                 dataset.add(tmpList);
                 datasetWithPK.addRecord(pk, tmpList);
             }
+            pstmt.close();
+            rs.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -81,9 +88,8 @@ public class MainDbController {
         return datasetWithPK;
     }
 
-
     public void randomDeletion(double deletionPercent){
-        String queryCountSql = String.format("SELECT COUNT(*) FROM %s", tableName);
+        String queryCountSql = String.format("SELECT COUNT(*) FROM %s", originTableName);
 
         int rowCount = 0;
         try {
@@ -92,19 +98,86 @@ public class MainDbController {
             while (rs.next()){
                 rowCount = rs.getInt(1);
             }
-            System.out.printf("表%s共%d行\n", tableName, rowCount);
+            System.out.printf("表%s共%d行%n", originTableName, rowCount);
             int deletionCount = (int)((double)rowCount*deletionPercent);
-            System.out.printf("随机删除%d条数据\n", deletionCount);
-            String deletionSql = String.format("DELETE FROM %s ORDER BY rand() LIMIT %d", tableName, deletionCount);
+            System.out.printf("随机删除%d条数据%n", deletionCount);
+            String deletionSql = String.format("DELETE FROM %s ORDER BY rand() LIMIT %d", originTableName, deletionCount);
             pstmt = conn.prepareStatement(deletionSql);
             pstmt.executeUpdate();
+
+            pstmt.close();
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * @Description 发布嵌入水印的数据集到数据库中
+     * @author Fcat
+     * @date 2019/4/1 21:44
+     */
+    public void publishDataset(){
+        String insertSql = "INSERT INTO "+ publishTableName +
+                " VALUES (?, ?, ?, ?, ?, " +
+                "?, ?, ?, ?, ? ," +
+                "?, ?, ?, ?, ?)";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(insertSql);
+            System.out.println("发布数据集共有" + datasetWithPK.getDataset().values().size()+"行");
+            Map<String, ArrayList<String>> dataset = datasetWithPK.getDataset();
+            dataset.forEach((k,v)->{
+                try {
+                    pstmt.setString(1, k);
+                    for (int i=0; i<v.size(); i++){
+                        pstmt.setString(i+1, v.get(i));
+                    }
+                    //System.out.println(pstmt);
+                    pstmt.executeUpdate();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            });
+            pstmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-
     }
 
+
+    public DatasetWithPK getPublishedDatasetWithPK(){
+        DatasetWithPK pubDatasetWithPK = new DatasetWithPK();
+        if(conn == null){
+            System.out.println("尚未连接数据库!");
+            return pubDatasetWithPK;
+        }
+        String querySql = String.format("SELECT * FROM %s", publishTableName);
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(querySql);
+            ResultSet rs = pstmt.executeQuery();
+            //获取该表的总列数
+            ResultSetMetaData rsMetadata = rs.getMetaData();
+            int colCount = rsMetadata.getColumnCount();
+            System.out.printf("表%s共有%d个字段%n", publishTableName, colCount);
+            while (rs.next()){
+                ArrayList<String> tmpList = new ArrayList<>(colCount);
+                for(int i=0; i<colCount; i++){
+                    //这里的index从1开始，包括id
+                    String data = rs.getString(i+1);
+                    tmpList.add(data);
+
+                }
+                String pk = rs.getString(1);
+                pubDatasetWithPK.addRecord(pk, tmpList);
+            }
+            pstmt.close();
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return pubDatasetWithPK;
+    }
 
 
 

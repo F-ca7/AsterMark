@@ -3,6 +3,7 @@ package team.aster.processor;
 import team.aster.algorithm.GenericOptimization;
 import team.aster.model.DatasetWithPK;
 import team.aster.model.PartitionedDataset;
+import team.aster.model.StoredKey;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -17,7 +18,7 @@ public class OptimDecoder implements IDecoder {
     private int minLength;
     //先只对一列进行嵌入水印解码，这里是最后一列FLATLOSE 转让盈亏(已扣税)
     //但是由于列之间的约束，这里还是不太科学
-    final int COL_INDEX = 13;
+    private static final int COL_INDEX = 14;
 
     public int getPartitionCount() {
         return partitionCount;
@@ -47,15 +48,24 @@ public class OptimDecoder implements IDecoder {
         this.minLength = minLength;
     }
 
-    @Override
-    public String decode(DatasetWithPK datasetWithPK) {
-        String decodedWatermark = "";
-        detectWatermark(Divider.divide(partitionCount, datasetWithPK, secretCode));
-        return decodedWatermark;
-
+    public void setStoredKeyParams(StoredKey storedKey){
+        setMinLength(storedKey.getMinLength());
+        setPartitionCount(storedKey.getPartitionCount());
+        setSecretCode(storedKey.getSecretCode());
+        setThreshold(storedKey.getThreshold());
+        setSecretKey(storedKey.getSecretKey());
+        setWmLength(storedKey.getWmLength());
     }
 
-    String detectWatermark(PartitionedDataset partitionedDataset){
+    @Override
+    public String decode(DatasetWithPK datasetWithPK) {
+        String decodedWatermark;
+        decodedWatermark = detectWatermark(Divider.divide(partitionCount, datasetWithPK, secretCode));
+        System.out.println("解码出来的水印为：" + decodedWatermark);
+        return decodedWatermark;
+    }
+
+    private String detectWatermark(PartitionedDataset partitionedDataset){
         int[] ones = new int[wmLength];
         int[] zeros = new int[wmLength];
 
@@ -75,7 +85,19 @@ public class OptimDecoder implements IDecoder {
                 }
             }
         });
-        //todo 根据ones和zeros生成水印
-        return "";
+
+        //据ones和zeros生成水印
+        StringBuffer wm = new StringBuffer();
+        for(int i=0;i<wmLength;i++){
+            if(ones[i]>zeros[i]){
+                wm.append("1");
+            }else if(ones[i]<zeros[i]){
+                wm.append("0");
+            }else{
+                wm.append("x");
+            }
+        }
+
+        return wm.toString();
     }
 }
