@@ -51,25 +51,26 @@ public abstract class OptimizationAlgorithm {
         double minSize = (double) minList.size();
         double maxSize = (double) maxList.size();
 
-        System.out.printf("min均值：%f, 方差：%f%n", minMean, minVar);
-        System.out.printf("max均值：%f, 方差：%f%n", maxMean, maxVar);
+        //System.out.printf("min均值：%f, 方差：%f%n", minMean, minVar);
+        //System.out.printf("max均值：%f, 方差：%f%n", maxMean, maxVar);
         //bit为0的概率
         double p0 = minSize/(minSize+maxSize);
         //bit为0的概率
         double p1 = maxSize/(minSize+maxSize);
 
         //下面的A, B, C都是二次方程的系数，已经先对方程做了化简
-        double A = (minVar - maxVar)/2;
-        double B = minMean*maxVar - maxMean*minVar;
-        double tmpC = (p0*Math.sqrt(maxVar))/(p1*Math.sqrt(minVar));
-        double C = minVar*maxVar*Math.log(tmpC) + (maxMean*maxMean*minVar - minMean*minMean*maxVar)/2;
+//        double A = (minVar - maxVar)/2;
+//        double B = minMean*maxVar - maxMean*minVar;
+//        double tmpC = (p0*Math.sqrt(maxVar))/(p1*Math.sqrt(minVar));
+//        double C = minVar*maxVar*Math.log(tmpC) + (maxMean*maxMean*minVar - minMean*minMean*maxVar)/2;
 
         //判断二次项系数是否为0
-        if (Math.abs(minVar - maxVar)<1e-6){
-            return getRootForLinear(B, C);
-        }else {
-            return getSmallerRootForQuad(A, B, C);
-        }
+//        if (Math.abs(minVar - maxVar)<0.01){
+//            return (minMean+maxMean)/2;
+//        }else {
+//            return getSmallerRootForQuad(A, B, C);
+//        }
+        return (minMean+maxMean)/2;
 
     }
 

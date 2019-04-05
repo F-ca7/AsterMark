@@ -2,10 +2,15 @@ package team.aster.database;
 
 import team.aster.model.StoredKey;
 import team.aster.utils.BinaryUtils;
-import team.aster.utils.Constants;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static team.aster.utils.Constants.MysqlDbConfig;
+import static team.aster.utils.Constants.StoredKeyDbInfo;
 
 
 /**
@@ -16,34 +21,17 @@ import java.util.ArrayList;
  */
 public class SecretKeyDbController {
 
-    private final static String DRIVER_NAME = Constants.MysqlDbConfig.DRIVER_NAME;
-    private final static String DB_NAME = Constants.MysqlDbConfig.STORED_KEY_DB_NAME;
-    private final static String TABLE_NAME = Constants.StoredKeyDbInfo.STORED_KEY_TABLE_NAME;
-    private final static String URL = Constants.MysqlDbConfig.URL;
-    private final static String CONN_PARAM = Constants.MysqlDbConfig.CONN_PARAM;
-    private final static String USERNAME = Constants.MysqlDbConfig.USERNAME;
-    private final static String PASSWORD = Constants.MysqlDbConfig.PASSWORD;
+    private final static String DRIVER_NAME = MysqlDbConfig.DRIVER_NAME;
+    private final static String DB_NAME = MysqlDbConfig.STORED_KEY_DB_NAME;
+    private final static String TABLE_NAME = StoredKeyDbInfo.STORED_KEY_TABLE_NAME;
+    private final static String URL = MysqlDbConfig.URL;
+    private final static String CONN_PARAM = MysqlDbConfig.CONN_PARAM;
+    private final static String USERNAME = MysqlDbConfig.USERNAME;
+    private final static String PASSWORD = MysqlDbConfig.PASSWORD;
     private Connection conn = null;
 
     //饿汉式加载
     private static SecretKeyDbController secretKeyDbController = new SecretKeyDbController();
-
-    private  SecretKeyDbController(){
-        try {
-            Class.forName(DRIVER_NAME);
-            conn = DriverManager.getConnection(URL +DB_NAME + CONN_PARAM, USERNAME, PASSWORD);
-            System.out.println("初始化SecretKeyDbController成功");
-        }  catch (ClassNotFoundException e) {
-            //todo 后期改用日志log打印
-            System.out.println("找不到驱动");
-            e.printStackTrace();
-        } catch (SQLException e) {
-            System.out.println("SQL错误");
-            e.printStackTrace();
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-    }
 
     public static SecretKeyDbController getInstance(){
         return secretKeyDbController;
@@ -111,6 +99,48 @@ public class SecretKeyDbController {
         return wmList;
     }
 
+    /**
+     * @Description 根据表和解码水印计算出数据库中存在相似度最大的水印
+     *              并且返回对应的目标公司
+     * @author Fcat
+     * @date 2019/4/5 21:14
+     * @param dbTable	对应的数据库::表
+     * @param watermark	解码的得到的水印
+     * @return java.lang.String 最有可能的目标公司
+     */
+    public String getMostLikelyTarget(String dbTable, String watermark){
+        //k:watermark, v:target
+        Map<String, String> wmListMap = new HashMap<>();
+        try {
+            //todo 查询已存在的水印
+            String querySql = String.format("SELECT watermark,target FROM %s WHERE db_table='%s'", TABLE_NAME, dbTable);
+            PreparedStatement pstmt = conn.prepareStatement(querySql);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()){
+                wmListMap.put(rs.getString(1), rs.getString(2));
+            }
+            pstmt.close();
+            rs.close();
+            System.out.println("已存在水印集为");
+            System.out.println(wmListMap);
+        } catch (SQLException e) {
+            System.out.println("SQL错误");
+            e.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        AtomicReference<Double> similarity = new AtomicReference<>(0.0);
+        AtomicReference<String> result = new AtomicReference<>("");
+        wmListMap.forEach((k,v)->{
+            double tmpSimilarity = BinaryUtils.getStringSimilarity(k, watermark);
+            if (tmpSimilarity > similarity.get()){
+                similarity.set(tmpSimilarity);
+                result.set(v);
+            }
+        });
+        return result.get();
+    }
+
 
     public void saveStoredKeysToDB(StoredKey storedKey){
         try {
@@ -127,7 +157,9 @@ public class SecretKeyDbController {
             pstmt.setString(7, storedKey.getDbTable());
             pstmt.setInt(8, storedKey.getPartitionCount());
             pstmt.setString(9, storedKey.getTarget());
+            //System.out.println(pstmt);
             pstmt.executeUpdate();
+
             System.out.println("保存水印参数数据成功！");
             pstmt.close();
         } catch (SQLException e) {
@@ -137,4 +169,24 @@ public class SecretKeyDbController {
             e.printStackTrace();
         }
     }
+
+
+    private SecretKeyDbController(){
+        try {
+            Class.forName(DRIVER_NAME);
+            conn = DriverManager.getConnection(URL +DB_NAME + CONN_PARAM, USERNAME, PASSWORD);
+            System.out.println("初始化SecretKeyDbController成功");
+        }  catch (ClassNotFoundException e) {
+            //todo 后期改用日志log打印
+            System.out.println("找不到驱动");
+            e.printStackTrace();
+        } catch (SQLException e) {
+            System.out.println("SQL错误");
+            e.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+
 }

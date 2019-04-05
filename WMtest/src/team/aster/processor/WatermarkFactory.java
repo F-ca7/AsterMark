@@ -18,6 +18,8 @@ public class WatermarkFactory {
         switch (watermarkType){
             case OPTIMIZATION:
                 return new OptimBasedWatermark();
+            case PRIMITIVE_LSB:
+                return new PrimitiveLSBWatermark();
             default:
                 return null;
         }

@@ -1,6 +1,7 @@
 package team.aster.processor;
 
 public enum WatermarkProcessorType{
-    OPTIMIZATION
+    OPTIMIZATION,
+    PRIMITIVE_LSB
 }
 

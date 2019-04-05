@@ -1,6 +1,7 @@
 package team.aster.processor;
 
 import team.aster.model.WaterMark;
+import team.aster.utils.BinaryUtils;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -9,26 +10,13 @@ import java.util.Random;
  * @author kun
  *
  */
-public class WaterMarkGenerator {
+class WaterMarkGenerator {
 	private static int MAX_TIMES = 100;
 	private static Random r = new Random();
 	private static int WATERMARK_SIZE = 16;
 
 	private static double SAME_THRESHOLD = 0.2;
 
-
-	public static double getSimilarity(ArrayList<Integer> checkedBinary,ArrayList<Integer> existedBinary) {
-		double length,sameNum=0;
-		if((length=checkedBinary.size())!=existedBinary.size()) {
-			return 0;
-		}
-		for(int i=0;i<length;i++) {
-			if(checkedBinary.get(i)==existedBinary.get(i)) {
-				sameNum++;
-			}
-		}
-		return sameNum/length;
-	}
 
 	private static ArrayList<Integer> toBinary(String string){
 		char[] tmp = string.toCharArray();
@@ -42,19 +30,7 @@ public class WaterMarkGenerator {
 		}
 		return binary;
 	}
-	
-	//Wrong!
-//	public String toString(ArrayList<Integer> binary) {
-//		StringBuffer string = new StringBuffer();
-//		for(int i=0;i<binary.size();i++) {
-//			if(binary.get(i)==1) {
-//				string.append('1');
-//			}else if(binary.get(i)==0) {
-//				string.append('0');
-//			}
-//		}
-//		return string.toString();
-//	}
+
 
 	private static String getRandomBinary() {
 		StringBuffer watermark = new StringBuffer();
@@ -88,7 +64,7 @@ public class WaterMarkGenerator {
 			boolean ok = true;
 			for(String existedString:result) {
 				ArrayList<Integer> existedBinary = toBinary(existedString);
-				if(getSimilarity(binary, existedBinary)>SAME_THRESHOLD) {
+				if(BinaryUtils.getSimilarity(binary, existedBinary)>SAME_THRESHOLD) {
 					ok=false;
 					break;
 				}

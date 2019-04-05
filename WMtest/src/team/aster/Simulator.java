@@ -4,7 +4,8 @@ import team.aster.database.MainDbController;
 import team.aster.database.SecretKeyDbController;
 import team.aster.model.StoredKey;
 import team.aster.processor.*;
-import team.aster.utils.Constants;
+
+import static team.aster.utils.Constants.*;
 
 enum Attack {
     INSERTION,
@@ -14,11 +15,15 @@ enum Attack {
 
 public class Simulator {
 
-    private final static String DB_NAME = Constants.MysqlDbConfig.EMBED_DB_NAME;
-    private final static String EMBED_TABLE_NAME = Constants.EmbedDbInfo.EMBED_TABLE_NAME;
-    private final static String PUBLISHED_TABLE_NAME = Constants.PublishDbInfo.EMBED_TABLE_NAME;
-    private final static int FETCH_COUNT = Constants.EmbedDbInfo.FETCH_COUNT;
+    private final static String DB_NAME = MysqlDbConfig.EMBED_DB_NAME;
+    private final static String EMBED_TABLE_NAME = EmbedDbInfo.EMBED_TABLE_NAME;
+    private final static String PUBLISHED_TABLE_NAME = PublishDbInfo.PUBLISH_TABLE_NAME;
+    private final static int FETCH_COUNT = EmbedDbInfo.FETCH_COUNT;
 
+    //使用的水印处理器类型
+    private final static WatermarkProcessorType WATERMARK_PROCESSOR_TYPE = WatermarkProcessorType.OPTIMIZATION;
+
+    //记录过程耗时
     private static long startTime;
     private static long endTime;
 
@@ -26,32 +31,30 @@ public class Simulator {
     public static void main(String[] args){
         //初始化数据库
         MainDbController dbController = initDatabase();
-
-        //使用基于最优化算法的水印嵌入
-        WatermarkFactory factory = new WatermarkFactory();
-        WatermarkProcessor wmProcessor = factory.getWatermarkProcessor(WatermarkProcessorType.OPTIMIZATION);
-        System.out.printf("初始化%s完成%n", wmProcessor.toString());
+        //初始化水印处理器
+        WatermarkProcessor wmProcessor = initProcessor();
 
         //嵌入水印
-        embedWatermark(dbController, wmProcessor.getEncoder());
-
+        //embedWatermark(dbController, wmProcessor.getEncoder());
         //发布数据集
-        publishTable(dbController);
-
+        //publishTable(dbController);
         //模拟攻击
         //simulateAttack(dbController, Attack.DELETION);
-
         //提取水印
         String extractedWatermark = extraWatermark(dbController, wmProcessor.getDecoder());
-        System.out.printf("提取到的水印为%s%n", extractedWatermark);
 
         //对提取水印溯源
-        System.out.println("开始溯源...");
         String target = identifyOrigin(getDbTableName(), extractedWatermark);
         System.out.println("溯源得到的目标为" + target);
 
     }
 
+    private static WatermarkProcessor initProcessor() {
+        WatermarkFactory factory = new WatermarkFactory();
+        WatermarkProcessor wmProcessor = factory.getWatermarkProcessor(WATERMARK_PROCESSOR_TYPE);
+        System.out.printf("初始化%s完成%n", wmProcessor.toString());
+        return wmProcessor;
+    }
 
 
     private static void publishTable(MainDbController dbController) {
@@ -68,8 +71,8 @@ public class Simulator {
         System.out.println("开始初始化数据库...");
         //初始化数据库
         MainDbController dbController = new MainDbController(DB_NAME, EMBED_TABLE_NAME);
-        dbController.setFetchCount(FETCH_COUNT);
-        dbController.setPublishTableName(PUBLISHED_TABLE_NAME);
+        dbController.setFetchCount(FETCH_COUNT);        //设置获取元组数
+        dbController.setPublishTableName(PUBLISHED_TABLE_NAME); //设置发布表名
         System.out.println("连接数据库成功");
 
         System.out.println("开始获取数据集");
@@ -102,7 +105,7 @@ public class Simulator {
             case INSERTION:
                 break;
             case DELETION:
-                double deletionPercent = 0.1;
+                double deletionPercent = PublishDbInfo.DELETION_PERCENT;
                 performDeletion(dbController, deletionPercent);
                 break;
             case ALTERNATION:
@@ -112,9 +115,11 @@ public class Simulator {
 
     private static void performDeletion(MainDbController dbController, double deletionPercent) {
         System.out.println("开始模拟删除攻击...");
+
         startTime = System.currentTimeMillis();
         dbController.randomDeletion(deletionPercent);
         endTime = System.currentTimeMillis();
+
         System.out.println("删除完毕");
         System.out.printf("删除攻击耗时：%d%n", (endTime - startTime));
     }
@@ -123,16 +128,23 @@ public class Simulator {
         System.out.println("开始提取水印...");
         //获取对应的各个秘钥、秘参
         StoredKey storedKey = SecretKeyDbController.getInstance().getStoredKeyByDbTable(getDbTableName());
-
-        //设置解码时的参数
-        OptimDecoder optimDecoder = (OptimDecoder) decoder;
-        optimDecoder.setStoredKeyParams(storedKey);
-        return optimDecoder.decode(dbController.getPublishedDatasetWithPK());
+        if (decoder instanceof OptimDecoder){
+            //设置解码时的参数
+            OptimDecoder optimDecoder = (OptimDecoder) decoder;
+            optimDecoder.setStoredKeyParams(storedKey);
+            return optimDecoder.decode(dbController.getPublishedDatasetWithPK());
+        }else if(decoder instanceof PrimLSBDecoder){
+            PrimLSBDecoder primLSBDecoder = (PrimLSBDecoder) decoder;
+            primLSBDecoder.setStoredKeyParams(storedKey);
+            primLSBDecoder.setOriginDatasetWithPK(dbController.getOriginDatasetWithPK());
+            return primLSBDecoder.decode(dbController.getPublishedDatasetWithPK());
+        }
+        return "empty!";
     }
 
     private static String identifyOrigin(String dbTable, String watermark){
-
-        return "";
+        System.out.println("开始溯源...");
+        return SecretKeyDbController.getInstance().getMostLikelyTarget(dbTable, watermark);
     }
 
 

@@ -10,8 +10,6 @@ import java.util.ArrayList;
 public class WaterMark {
 
 	private int length;
-
-
 	//String origin;
 	ArrayList<Integer> binary;
 

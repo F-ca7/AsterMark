@@ -66,10 +66,10 @@ public class OptimDecoder implements IDecoder {
         return decodedWatermark;
     }
 
+
     private String detectWatermark(PartitionedDataset partitionedDataset){
         int[] ones = new int[wmLength];
         int[] zeros = new int[wmLength];
-
         Map<Integer, ArrayList<ArrayList<String>>> map = partitionedDataset.getPartitionedDataset();
         map.forEach((k, v)->{
             if(v.size() >= minLength){

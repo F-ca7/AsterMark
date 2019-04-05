@@ -1,7 +1,7 @@
 package team.aster.database;
 
 import team.aster.model.DatasetWithPK;
-import team.aster.utils.Constants;
+import team.aster.utils.Constants.MysqlDbConfig;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -17,6 +17,12 @@ public class MainDbController {
 
     private int fetchCount = 1000;
     private ArrayList<ArrayList<String>> dataset;
+    private DatasetWithPK originDatasetWithPK;
+
+    public DatasetWithPK getOriginDatasetWithPK() {
+        return originDatasetWithPK;
+    }
+
     private DatasetWithPK datasetWithPK;
 
 
@@ -42,6 +48,7 @@ public class MainDbController {
         this.originTableName = tableName;
         this.dataset = new ArrayList<>();
         this.datasetWithPK = new DatasetWithPK();
+        this.originDatasetWithPK = new DatasetWithPK();
         connectDB();
     }
 
@@ -68,15 +75,19 @@ public class MainDbController {
             System.out.printf("表%s共有%d个字段%n", originTableName, colCount);
             while (rs.next()){
                 ArrayList<String> tmpList = new ArrayList<>(colCount);
+                ArrayList<String> tmpList2 = new ArrayList<>(colCount);
                 for(int i=0; i<colCount; i++){
                     //这里的index从1开始，包括id
                     String data = rs.getString(i+1);
                     tmpList.add(data);
+                    tmpList2.add(data);
 
                 }
                 String pk = rs.getString(1);
                 dataset.add(tmpList);
                 datasetWithPK.addRecord(pk, tmpList);
+
+                originDatasetWithPK.addRecord(pk, tmpList2);
             }
             pstmt.close();
             rs.close();
@@ -89,8 +100,9 @@ public class MainDbController {
         return datasetWithPK;
     }
 
+
     public void randomDeletion(double deletionPercent){
-        String queryCountSql = String.format("SELECT COUNT(*) FROM %s", originTableName);
+        String queryCountSql = String.format("SELECT COUNT(*) FROM %s", publishTableName);
 
         int rowCount = 0;
         try {
@@ -102,7 +114,7 @@ public class MainDbController {
             System.out.printf("表%s共%d行%n", originTableName, rowCount);
             int deletionCount = (int)((double)rowCount*deletionPercent);
             System.out.printf("随机删除%d条数据%n", deletionCount);
-            String deletionSql = String.format("DELETE FROM %s ORDER BY rand() LIMIT %d", originTableName, deletionCount);
+            String deletionSql = String.format("DELETE FROM %s ORDER BY rand() LIMIT %d", publishTableName, deletionCount);
             pstmt = conn.prepareStatement(deletionSql);
             pstmt.executeUpdate();
 
@@ -205,11 +217,11 @@ public class MainDbController {
     private void connectDB() {
         //mysql配置信息
         try {
-            String DRIVER_NAME = Constants.MysqlDbConfig.DRIVER_NAME;
-            String URL = Constants.MysqlDbConfig.URL;
-            String USERNAME = Constants.MysqlDbConfig.USERNAME;
-            String PASSWORD = Constants.MysqlDbConfig.PASSWORD;
-            String CONN_PARAM = Constants.MysqlDbConfig.CONN_PARAM;
+            String DRIVER_NAME = MysqlDbConfig.DRIVER_NAME;
+            String URL = MysqlDbConfig.URL;
+            String USERNAME = MysqlDbConfig.USERNAME;
+            String PASSWORD = MysqlDbConfig.PASSWORD;
+            String CONN_PARAM = MysqlDbConfig.CONN_PARAM;
 
             Class.forName(DRIVER_NAME);
             conn = DriverManager.getConnection(URL + dbName + CONN_PARAM, USERNAME, PASSWORD);

@@ -10,9 +10,9 @@ import java.util.Collections;
 public final class PatternSearch extends OptimizationAlgorithm{
     private double STEP_LENGTH = 60;
     private double PRECISION = 0.01;
-    private double DECAY_RATE = 0.8;
-    private double ACCURATE = 10;
-    private int TURN_NUM = 1000;
+    private double DECAY_RATE = 0.9;
+    private double ACCURATE = 2;
+    private int TURN_NUM = 500;
     private double UPPER_BOUND;
     private double LOWER_BOUND;
     private ArrayList<Double> initState;
@@ -92,7 +92,6 @@ public final class PatternSearch extends OptimizationAlgorithm{
             tmpChange.set(i, tmpChange.get(i)+ACCURATE*(recordState.get(i)-initState.get(i)));
         }
 
-        //todo 不要直接改变引用 否则无法写回
         if(cmp(x,y)&&(meanBuckets-PRECISION<exp)) {
             changeRecord = tmpChange;
             initState = recordState = tmp;
