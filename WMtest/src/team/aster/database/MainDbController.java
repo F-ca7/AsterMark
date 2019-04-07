@@ -1,47 +1,27 @@
 package team.aster.database;
 
 import team.aster.model.DatasetWithPK;
+import team.aster.utils.Constants;
 import team.aster.utils.Constants.MysqlDbConfig;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Map;
 
+
 public class MainDbController {
     private Connection conn;
 
-    //要操作的表
-    private String dbName;
+    private String dbName;              //操作的数据库名
     private String originTableName;     //源表名
     private String publishTableName;    //发布表名
 
-    private int fetchCount = 1000;
+    private int fetchCount = Constants.EmbedDbInfo.FETCH_COUNT;
     private ArrayList<ArrayList<String>> dataset;
+    //原数据集
     private DatasetWithPK originDatasetWithPK;
-
-    public DatasetWithPK getOriginDatasetWithPK() {
-        return originDatasetWithPK;
-    }
-
     private DatasetWithPK datasetWithPK;
 
-
-    public void setTableName(String tableName) {
-        this.originTableName = tableName;
-    }
-
-    public void setPublishTableName(String publishTableName) {
-        this.publishTableName = publishTableName;
-    }
-
-
-    public void setFetchCount(int fetchCount) {
-        this.fetchCount = fetchCount;
-    }
-
-    public int getFetchCount() {
-        return fetchCount;
-    }
 
     public MainDbController(String dbName, String tableName){
         this.dbName = dbName;
@@ -86,7 +66,7 @@ public class MainDbController {
                 String pk = rs.getString(1);
                 dataset.add(tmpList);
                 datasetWithPK.addRecord(pk, tmpList);
-
+                //todo 这里留存了副本 考虑去掉
                 originDatasetWithPK.addRecord(pk, tmpList2);
             }
             pstmt.close();
@@ -239,5 +219,27 @@ public class MainDbController {
 
 
 
+
+
+    public void setTableName(String tableName) {
+        this.originTableName = tableName;
+    }
+
+    public void setPublishTableName(String publishTableName) {
+        this.publishTableName = publishTableName;
+    }
+
+
+    public void setFetchCount(int fetchCount) {
+        this.fetchCount = fetchCount;
+    }
+
+    public int getFetchCount() {
+        return fetchCount;
+    }
+
+    public DatasetWithPK getOriginDatasetWithPK() {
+        return originDatasetWithPK;
+    }
 
 }

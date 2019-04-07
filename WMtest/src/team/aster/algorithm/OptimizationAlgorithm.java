@@ -9,6 +9,8 @@ public abstract class OptimizationAlgorithm {
     public abstract double maximizeByHidingFunction(ArrayList<Double> colValues, double ref, double lower, double upper);
     public abstract double minimizeByHidingFunction(ArrayList<Double> colValues, double ref, double lower, double upper);
     public abstract ArrayList<Double> getModifiedColumn();
+
+
     /**
      * @Description 获取对应的hiding function的值
      * @author Fcat
@@ -23,10 +25,29 @@ public abstract class OptimizationAlgorithm {
         colValues.forEach(stats::addValue);
         double mean = stats.getMean();
         double varianceSqrt = Math.sqrt(stats.getVariance());
-        System.out.println("均值为"+mean);
-        System.out.println("标准差为"+varianceSqrt);
-        return mean + secretKey*varianceSqrt;
+        //System.out.println("均值为"+mean);
+        //System.out.println("标准差为"+varianceSqrt);
+        double ref = mean + secretKey*varianceSqrt;
+        double sum = 0;
+        for (double i:colValues){
+            sum += getSigmoid(i, ref);
+        }
+        return sum/(double)colValues.size();
     }
+
+    public static double getOHidingValue(ArrayList<Double> colValues, double secretKey){
+        double sum = 0.0;
+        for (double i:colValues){
+            sum += getSigmoid(i, PatternSearch.OREF);
+        }
+        return sum/(double)colValues.size();
+    }
+
+    private static double getSigmoid(double i, double oref) {
+        double ALPHA = 8;
+        return (1.0-1.0/(1+Math.exp(ALPHA*(i-oref))));
+    }
+
 
     /**
      * @Description 计算最优化的阈值T
@@ -48,15 +69,15 @@ public abstract class OptimizationAlgorithm {
         double minVar = minStats.getVariance();
         double maxVar = maxStats.getVariance();
 
-        double minSize = (double) minList.size();
-        double maxSize = (double) maxList.size();
+//        double minSize = (double) minList.size();
+//        double maxSize = (double) maxList.size();
 
-        //System.out.printf("min均值：%f, 方差：%f%n", minMean, minVar);
-        //System.out.printf("max均值：%f, 方差：%f%n", maxMean, maxVar);
+        System.out.printf("min均值：%f, 方差：%f%n", minMean, minVar);
+        System.out.printf("max均值：%f, 方差：%f%n", maxMean, maxVar);
         //bit为0的概率
-        double p0 = minSize/(minSize+maxSize);
+//        double p0 = minSize/(minSize+maxSize);
         //bit为0的概率
-        double p1 = maxSize/(minSize+maxSize);
+//        double p1 = maxSize/(minSize+maxSize);
 
         //下面的A, B, C都是二次方程的系数，已经先对方程做了化简
 //        double A = (minVar - maxVar)/2;

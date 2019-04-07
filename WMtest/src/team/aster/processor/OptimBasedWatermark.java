@@ -7,8 +7,6 @@ class OptimBasedWatermark extends WatermarkProcessor {
         decoder = new OptimDecoder();
     }
 
-
-
     @Override
     public String toString() {
         return "Optimization Based team.aster.processor";

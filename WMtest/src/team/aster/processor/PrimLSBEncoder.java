@@ -12,16 +12,16 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
 
-public class PrimLSBEncoder implements IEncoder {
+public class PrimLSBEncoder extends IEncoderImpl {
     private static final int COL_INDEX = Constants.EmbedDbInfo.EMBED_COL_INDEX-1;
-    private final int PARTITION_COUNT = Constants.EmbedDbInfo.PARTITION_COUNT;
-    private final double VAR_BOUND_RATIO = 0.1;     //一个数值的最大变化比例
-    private final double MIN_VAR = 0.01;            //一个数值的最小变化量
+    private static final int PARTITION_COUNT = Constants.EmbedDbInfo.PARTITION_COUNT;
+    private static final double VAR_BOUND_RATIO = 0.1;     //一个数值的最大变化比例
+    private static final double MIN_VAR = 0.01;            //一个数值的最小变化量
 
     @Override
     public void encode(DatasetWithPK datasetWithPK, ArrayList<String> watermarkList) {
         System.out.println(this.toString()+"开始工作");
-        String secreteCode = SecretCodeGenerator.getSecreteCode(10);
+        String secreteCode = SecretCodeGenerator.getSecretCode(10);
         //对datasetWithPK进行划分
         PartitionedDataset partitionedDataset = Divider.divide(PARTITION_COUNT, datasetWithPK, secreteCode);
 
@@ -35,8 +35,8 @@ public class PrimLSBEncoder implements IEncoder {
         //保存水印信息
         //TODO 此处逻辑有问题他，dbtable和target不应在这里
         StoredKey storedKey = new StoredKey.Builder()
-                .setDbTable("wm_exp::transaction_2013")
-                .setTarget("Alibaba").setPartitionCount(PARTITION_COUNT)
+                .setDbTable(dbTable)
+                .setTarget(target).setPartitionCount(PARTITION_COUNT)
                 .setWaterMark(waterMark).setWmLength(waterMark.getLength())
                 .setSecretCode(secreteCode)
                 .build();

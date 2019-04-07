@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.sql.ResultSet.CONCUR_READ_ONLY;
+import static java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE;
 import static team.aster.utils.Constants.MysqlDbConfig;
 import static team.aster.utils.Constants.StoredKeyDbInfo;
 
@@ -46,14 +48,14 @@ public class SecretKeyDbController {
      * @return team.aster.model.StoredKey
      */
     public StoredKey getStoredKeyByDbTable(String dbTable){
-        String querySql = String.format("SELECT * FROM %s WHERE db_table='%s' LIMIT 1", TABLE_NAME, dbTable);
+        String querySql = String.format("SELECT * FROM %s WHERE db_table='%s'", TABLE_NAME, dbTable);
         PreparedStatement pstmt;
         StoredKey storedKey = new StoredKey.Builder().build();
         try {
-            pstmt = conn.prepareStatement(querySql);
+            pstmt = conn.prepareStatement(querySql, TYPE_SCROLL_INSENSITIVE, CONCUR_READ_ONLY);
             ResultSet rs = pstmt.executeQuery();
             //移动cursor到最后一行
-            rs.last();
+            rs.absolute(-1);
             storedKey = new StoredKey.Builder().
                     setSecretKey(rs.getDouble("secretKey")).
                     setSecretCode(rs.getString("secretCode")).
@@ -61,6 +63,7 @@ public class SecretKeyDbController {
                     setMinLength(rs.getInt("min_length")).
                     setPartitionCount(rs.getInt("partition_count")).
                     setThreshold(rs.getDouble("threshold")).build();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -138,6 +141,7 @@ public class SecretKeyDbController {
                 result.set(v);
             }
         });
+        System.out.println("相似度为"+similarity+", 结果为"+result);
         return result.get();
     }
 

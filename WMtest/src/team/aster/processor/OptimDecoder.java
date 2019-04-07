@@ -56,6 +56,7 @@ public class OptimDecoder implements IDecoder {
         setThreshold(storedKey.getThreshold());
         setSecretKey(storedKey.getSecretKey());
         setWmLength(storedKey.getWmLength());
+        System.out.println("使用secretCode为"+secretCode);
     }
 
     @Override
@@ -78,8 +79,8 @@ public class OptimDecoder implements IDecoder {
                 v.forEach(strValues->{
                     colValues.add(Double.parseDouble(strValues.get(COL_INDEX)));
                 });
-                double hidingValue = GenericOptimization.getHidingValue(colValues, secretKey);
-                if (hidingValue >= this.threshold) {
+                double hidingValue = GenericOptimization.getOHidingValue(colValues, secretKey);
+                if (hidingValue > this.threshold) {
                     ones[index]++;
                 } else{
                     zeros[index]++;

@@ -8,11 +8,11 @@ import java.util.Collections;
  *
  */
 public final class PatternSearch extends OptimizationAlgorithm{
-    private double STEP_LENGTH = 60;
-    private double PRECISION = 0.01;
-    private double DECAY_RATE = 0.9;
-    private double ACCURATE = 2;
-    private int TURN_NUM = 500;
+    private double STEP_LENGTH = 500;
+    private double PRECISION = 0.001;
+    private double DECAY_RATE = 0.95;
+    private double ACCURATE = 0;
+    private int TURN_NUM = 100;
     private double UPPER_BOUND;
     private double LOWER_BOUND;
     private ArrayList<Double> initState;
@@ -20,6 +20,7 @@ public final class PatternSearch extends OptimizationAlgorithm{
     private ArrayList<Double> changeRecord;
     private double ALPHA = 8;
     private double REF;
+    public static double OREF;
     private boolean IS_MAX;
     private double exp = -0.00001;
     private void setBound(double lower,double upper) {
@@ -28,6 +29,7 @@ public final class PatternSearch extends OptimizationAlgorithm{
     }
     private void setRef(double ref) {
         REF = ref;
+        OREF = ref;
     }
     private double getSigmoid(double x) {
         return (1.0-1.0/(1+Math.exp(ALPHA*(x-REF))));
@@ -105,6 +107,7 @@ public final class PatternSearch extends OptimizationAlgorithm{
             searchByPattern();
         }
     }
+
     public ArrayList<Double> getResult(){
         return this.initState;
     }
@@ -128,7 +131,7 @@ public final class PatternSearch extends OptimizationAlgorithm{
         setRef(ref);
         setBound(lower,upper);
         search();
-        System.out.println(recordState);
+        //System.out.println(recordState);
         return getOptimizedResult();
     }
 
@@ -141,22 +144,5 @@ public final class PatternSearch extends OptimizationAlgorithm{
     public ArrayList<Double> getModifiedColumn() {
         return initState;
     }
-
-//    public static void main(String[] args) {
-//
-//        ArrayList<Double> test = new ArrayList<Double>();
-//        test.add(1000.0);
-//        test.add(1200.0);
-//        test.add(1700.0);
-//        test.add(1800.0);
-//        PatternSearch p = new PatternSearch(test, 1464.6, -300, 300, true);
-//        ArrayList<Double> list = p.getResult();
-//        double sum=0;
-//        for(double i:list) {
-//            sum+=i;
-//        }
-//        System.out.println(list);
-//        System.out.println(sum/4);
-//    }
 
 }

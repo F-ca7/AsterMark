@@ -13,7 +13,7 @@ import team.aster.utils.Constants;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class OptimEncoder implements IEncoder {
+public class OptimEncoder extends IEncoderImpl {
     private ArrayList<Double> minList = new ArrayList<>();
     private ArrayList<Double> maxList = new ArrayList<>();
 
@@ -22,9 +22,9 @@ public class OptimEncoder implements IEncoder {
     private static final int COL_INDEX = Constants.EmbedDbInfo.EMBED_COL_INDEX-1;
     private static final int MIN_PART_LENGTH = 10;
     private static final double SECRET_KEY = 0.1;
-    private final int PARTITION_COUNT = Constants.EmbedDbInfo.PARTITION_COUNT;
-    private double threshold;
+    private static final int PARTITION_COUNT = Constants.EmbedDbInfo.PARTITION_COUNT;
 
+    private double threshold;
 
 
     public ArrayList<Double> getMinList() {
@@ -42,13 +42,12 @@ public class OptimEncoder implements IEncoder {
     @Override
     public void encode(DatasetWithPK datasetWithPK, ArrayList<String> watermarkList) {
         System.out.println(this.toString()+"开始工作");
-
-        String secreteCode = SecretCodeGenerator.getSecreteCode(10);
+        //根据数据库表名生成secretCode
+        String secreteCode = SecretCodeGenerator.getSecretCode(dbTable);
         //对datasetWithPK进行划分
         PartitionedDataset partitionedDataset = Divider.divide(PARTITION_COUNT, datasetWithPK, secreteCode);
 
         System.out.printf("预期划分数为%d，实际划分数为%d%n", PARTITION_COUNT, partitionedDataset.getPartitionedDataset().keySet().size());
-
 
         //生成水印
         WaterMark waterMark = WaterMarkGenerator.getWaterMark(watermarkList);
@@ -66,9 +65,9 @@ public class OptimEncoder implements IEncoder {
         //todo 是否不应该交给它来保存秘钥信息
         //TODO 此处逻辑有问题他，dbtable和target不应在这里
         StoredKey storedKey = new StoredKey.Builder()
-                .setDbTable("wm_exp::transaction_2013").setMinLength(MIN_PART_LENGTH)
+                .setDbTable(dbTable).setMinLength(MIN_PART_LENGTH)
                 .setSecretKey(SECRET_KEY).setThreshold(threshold)
-                .setTarget("Tencent").setPartitionCount(PARTITION_COUNT)
+                .setTarget(target).setPartitionCount(PARTITION_COUNT)
                 .setWaterMark(waterMark).setWmLength(waterMark.getLength())
                 .setSecretCode(secreteCode)
                 .build();
@@ -86,13 +85,6 @@ public class OptimEncoder implements IEncoder {
         }
     }
 
-
-
-    @Override
-    public String toString() {
-        return "Optimization based Encoder";
-    }
-
     /**
      * @Description 对划分好的数据集嵌入水印，直接修改划分里的数据集
      * @author Fcat
@@ -106,7 +98,7 @@ public class OptimEncoder implements IEncoder {
         int wmLength = watermark.size();
         datasetWithIndex.forEach((k,v)->{
             int index = k%wmLength;
-            System.out.printf("正在处理第%d个划分...\n嵌入水印位为第%d位\n", k, index);
+            //System.out.printf("正在处理第%d个划分...\n嵌入水印位为第%d位\n", k, index);
             encodeSingleBit(v, index, watermark.get(index));
         });
         //保存阈值T
@@ -125,7 +117,7 @@ public class OptimEncoder implements IEncoder {
      * @return void
      */
     private void encodeSingleBit(ArrayList<ArrayList<String>> partition, int bitIndex, int bit){
-        System.out.printf("正在对第%d个字段嵌入水印的第%d位: %d%n", COL_INDEX +1, bitIndex, bit);
+        //System.out.printf("正在对第%d个字段嵌入水印的第%d位: %d%n", COL_INDEX +1, bitIndex, bit);
         ArrayList<Double> colValues = new ArrayList<>();
         for(ArrayList<String> row: partition){
             double value = Double.valueOf(row.get(COL_INDEX));
@@ -157,13 +149,20 @@ public class OptimEncoder implements IEncoder {
         String resultStr;
         for(ArrayList<String> row: partition){
             resultStr = String.format("%.2f", modifiedCol.get(rowIndex));
-            System.out.println("将原来的"+row.get(COL_INDEX)+"改为"+resultStr);
+            //System.out.println("将原来的"+row.get(COL_INDEX)+"改为"+resultStr);
             row.set(COL_INDEX, resultStr);
             rowIndex++;
         }
 
     }
 
+
+
+
+    @Override
+    public String toString() {
+        return "Optimization based Encoder";
+    }
 
 }
 

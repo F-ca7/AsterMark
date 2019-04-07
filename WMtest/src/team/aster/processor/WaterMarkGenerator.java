@@ -11,11 +11,11 @@ import java.util.Random;
  *
  */
 class WaterMarkGenerator {
-	private static int MAX_TIMES = 100;
+	private static final int MAX_TIMES = 100;
 	private static Random r = new Random();
-	private static int WATERMARK_SIZE = 16;
+	private static final int WATERMARK_SIZE = 16;
 
-	private static double SAME_THRESHOLD = 0.2;
+	private static final double SAME_THRESHOLD = 0.5;
 
 
 	private static ArrayList<Integer> toBinary(String string){
@@ -72,8 +72,7 @@ class WaterMarkGenerator {
 			if(ok) {
 				WaterMark w = new WaterMark(WATERMARK_SIZE, binary);
 				return w;
-
-				}
+			}
 			times++;
 		}
 		return null;
