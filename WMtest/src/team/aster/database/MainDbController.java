@@ -7,6 +7,7 @@ import team.aster.utils.Constants.MysqlDbConfig;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.UUID;
 
 
 public class MainDbController {
@@ -172,6 +173,37 @@ public class MainDbController {
         return pubDatasetWithPK;
     }
 
+
+    public boolean publiahDatasetFromFile(String filepath){
+        boolean isSuccess;
+        String uuid = UUID.randomUUID().toString().replaceAll("-","").substring(0,10);
+        String publishName = publishTableName + "_"+uuid;
+        String createNewTableSql = String.format("CREATE TABLE %s LIKE %s", publishName, originTableName);
+        // 在regex中"\\"表示一个"\"，在java中一个"\"也要用"\\"表示。这样，前一个"\\"代表regex中的"\"，后一个"\\"代表java中的"\"
+        filepath = filepath.replaceAll("\\\\","\\\\\\\\");  //必须要把\替换成\\，否则sql无法解析
+        String loadSql = String.format("load data infile '%s' into table %s fields terminated by',' lines terminated by '\\r\\n';", filepath, publishName);
+        //System.out.println(loadSql);
+        PreparedStatement pstmt = null;
+        try {
+            pstmt = conn.prepareStatement(createNewTableSql);
+            pstmt.executeUpdate();
+            pstmt = conn.prepareStatement(loadSql);
+            pstmt.executeUpdate();
+            isSuccess = true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            isSuccess = false;
+        } finally {
+            if (pstmt != null){
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return isSuccess;
+    }
 
 
     //仅用于小规模调试

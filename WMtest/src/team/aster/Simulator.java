@@ -6,6 +6,8 @@ import team.aster.model.DatasetWithPK;
 import team.aster.model.StoredKey;
 import team.aster.processor.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -47,6 +49,10 @@ public class Simulator {
 
         //嵌入水印
         embedWatermark(dbController, wmProcessor.getEncoder());
+        //导出数据集到文件
+        exportEmbeddedDataset(dbController);
+        //通过csv文件导入数据库
+        publishTableFromFile(dbController);
         //发布数据集
         //publishTable(dbController);
         //模拟攻击
@@ -59,6 +65,52 @@ public class Simulator {
         String target = identifyOrigin(getDbTableName(), extractedWatermark);
         System.out.println("溯源得到的目标为" + target);
 
+    }
+
+
+    //从文件导入到数据库
+    private static void publishTableFromFile(MainDbController dbController) {
+        startTime = System.currentTimeMillis();
+        boolean publishSuccess = dbController.publiahDatasetFromFile(getAbsoluteProjPath() +"\\"+ getExportCSVFileName());
+        if (publishSuccess){
+            endTime = System.currentTimeMillis();
+            System.out.printf("从csv文件导入%d条数据集到数据库耗时： %d ms%n", dbController.getFetchCount(), (endTime - startTime));
+        } else {
+            System.out.println("从csv文件导入到数据库失败");
+        }
+
+    }
+
+    //获取项目绝对路径
+    private static String getAbsoluteProjPath() {
+        File directory = new File("");// 参数为空
+        String projPath = directory.getAbsolutePath();
+        //System.out.println(projPath);
+        return projPath;
+    }
+
+    //导出已嵌入水印的数据集
+    private static void exportEmbeddedDataset(MainDbController dbController) {
+        startTime = System.currentTimeMillis();
+        File file = new File(getExportCSVFileName());
+        try {
+            file.createNewFile();
+            boolean flag = dbController.getDatasetWithPK().exportToCSV(file);
+            if (flag){
+                System.out.println("导出到csv文件成功");
+            } else {
+                System.out.println("导出到csv文件失败");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        endTime = System.currentTimeMillis();
+
+        System.out.printf("导出%d条数据集到csv文件耗时： %d ms%n", dbController.getFetchCount(), (endTime - startTime));
+    }
+
+    private static String getExportCSVFileName() {
+        return EMBED_TABLE_NAME+"_publish.csv";
     }
 
 
@@ -145,8 +197,12 @@ public class Simulator {
                 performDeletion(dbController, deletionPercent);
                 break;
             case ALTERNATION:
+                performLSBAlternation(dbController);
                 break;
         }
+    }
+
+    private static void performLSBAlternation(MainDbController dbController) {
     }
 
     private static void performDeletion(MainDbController dbController, double deletionPercent) {
@@ -192,7 +248,13 @@ public class Simulator {
 
     private static String identifyOrigin(String dbTable, String watermark){
         System.out.println("开始溯源...");
-        return SecretKeyDbController.getInstance().getMostLikelyTarget(dbTable, watermark);
+
+        startTime = System.currentTimeMillis();
+        String orign = SecretKeyDbController.getInstance().getMostLikelyTarget(dbTable, watermark);
+        endTime = System.currentTimeMillis();
+
+        System.out.printf("溯源耗时%d%n", (endTime-startTime));
+        return orign;
     }
 
 
