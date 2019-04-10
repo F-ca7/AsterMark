@@ -1,5 +1,7 @@
 package team.aster.processor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import team.aster.database.SecretKeyDbController;
 import team.aster.model.DatasetWithPK;
 import team.aster.model.PartitionedDataset;
@@ -13,6 +15,8 @@ import java.util.Map;
 import java.util.Random;
 
 public class PrimLSBEncoder extends IEncoderNumericImpl {
+    private static Logger logger = LoggerFactory.getLogger(PrimLSBDecoder.class);
+
     private static final int COL_INDEX = Constants.EmbedDbInfo.EMBED_COL_INDEX-1;
     private static final int PARTITION_COUNT = Constants.EmbedDbInfo.PARTITION_COUNT;
     private static final double VAR_BOUND_RATIO = 0.1;     //一个数值的最大变化比例
@@ -30,15 +34,12 @@ public class PrimLSBEncoder extends IEncoderNumericImpl {
 
         assert waterMark != null;
         encodeAllBits(partitionedDataset, waterMark.getBinary());
+        logger.info("嵌入水印为 " + BinaryUtils.parseBinaryToString(waterMark.getBinary()));
 
-        System.out.println("嵌入水印为"+ BinaryUtils.parseBinaryToString(waterMark.getBinary()));
-        //保存水印信息
-        //TODO 此处逻辑有问题他，dbtable和target不应在这里
-        StoredKey storedKey = new StoredKey.Builder()
-                .setPartitionCount(PARTITION_COUNT)
-                .setWaterMark(waterMark).setWmLength(waterMark.getLength())
-                .setSecretCode(secreteCode)
-                .build();
+        // 补充完秘钥信息
+        completeStoredKey(secreteCode, 0, waterMark);
+        StoredKey storedKey = storedKeyBuilder.build();
+        // 保存水印信息
         SecretKeyDbController.getInstance().saveStoredKeysToDB(storedKey);
 
         //更新数据
@@ -99,7 +100,7 @@ public class PrimLSBEncoder extends IEncoderNumericImpl {
                 }
                 break;
             default:
-                System.out.println("水印出错！");
+                logger.error("水印出错! ");
                 break;
         }
 
@@ -108,14 +109,11 @@ public class PrimLSBEncoder extends IEncoderNumericImpl {
         String resultStr;
         for(ArrayList<String> row: partition){
             resultStr = String.format("%.2f", colValues.get(rowIndex));
-            System.out.println("将原来的" + row.get(COL_INDEX )+ "改为" + resultStr);
+            //System.out.println("将原来的" + row.get(COL_INDEX )+ "改为" + resultStr);
             row.set(COL_INDEX, resultStr);
             rowIndex++;
         }
     }
 
-    @Override
-    public void completeStoredKey(String secretCode, double threshold, WaterMark waterMark) {
 
-    }
 }

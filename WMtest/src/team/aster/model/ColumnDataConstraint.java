@@ -33,7 +33,18 @@ public class ColumnDataConstraint {
         this.constraintType = constraintType;
         this.varLowerBound = varLowerBound;
         this.varUpperBound = varUpperBound;
+        precision = precision<0? 0:precision;   //精度只能大于等于0
         this.precision = precision;
+    }
+
+    @Override
+    public String toString() {
+        return "ColumnDataConstraint{" +
+                "constraintType=" + constraintType +
+                ", varLowerBound=" + varLowerBound +
+                ", varUpperBound=" + varUpperBound +
+                ", precision=" + precision +
+                '}';
     }
 }
 

@@ -8,7 +8,7 @@ import java.util.Collections;
  *
  */
 public final class PatternSearch extends OptimizationAlgorithm{
-    private double STEP_LENGTH = 500;
+    private double STEP_LENGTH = 150;
     private double PRECISION = 0.001;
     private double DECAY_RATE = 0.95;
     private double ACCURATE = 0;
@@ -52,24 +52,17 @@ public final class PatternSearch extends OptimizationAlgorithm{
         return sum/recordState.size();
     }
     private void stepByStep() {
-        double meanBuckets = 0.0;
         ArrayList<Double>tmp = new ArrayList<Double>(recordState);
         int len = tmp.size();
         boolean addOp=true,delOp=true;
         for(int i=0;i<len;i++) {
             double valueI = tmp.get(i);
-            if(len-i<=Math.abs(meanBuckets)/STEP_LENGTH) {
-                if(meanBuckets>0) addOp=false;
-                else delOp=false;
-            }
-            if(cmp(getSigmoid(valueI+STEP_LENGTH),getSigmoid(valueI))&&addOp&&changeRecord.get(i)<=UPPER_BOUND) {
+            if(cmp(getSigmoid(valueI+STEP_LENGTH),getSigmoid(valueI))&&changeRecord.get(i)<UPPER_BOUND) {
                 tmp.set(i, valueI+STEP_LENGTH);
                 changeRecord.set(i, changeRecord.get(i)+STEP_LENGTH);
-                meanBuckets+=STEP_LENGTH;
-            }else if(cmp(getSigmoid(valueI-STEP_LENGTH),getSigmoid(valueI))&&delOp&&changeRecord.get(i)>=LOWER_BOUND) {
+            }else if(cmp(getSigmoid(valueI-STEP_LENGTH),getSigmoid(valueI))&&changeRecord.get(i)>LOWER_BOUND) {
                 tmp.set(i, valueI-STEP_LENGTH);
-                changeRecord.set(i, changeRecord.get(i)+STEP_LENGTH);
-                meanBuckets-=STEP_LENGTH;
+                changeRecord.set(i, changeRecord.get(i)-STEP_LENGTH);
             }
         }
         recordState = tmp;
@@ -81,20 +74,22 @@ public final class PatternSearch extends OptimizationAlgorithm{
         }
     }
     private void searchByPattern() {
-        double meanBuckets = 0;
         ArrayList<Double>tmp = new ArrayList<Double>(recordState);
         ArrayList<Double>tmpChange = new ArrayList<Double>(changeRecord);
-        int len = tmp.size();
+        int len = tmp.size();boolean ok=true;
         double x=0,y=0;
         for(int i=0;i<len;i++) {
-            meanBuckets += ACCURATE*(recordState.get(i)-initState.get(i));
+            if(changeRecord.get(i)>UPPER_BOUND||changeRecord.get(i)<LOWER_BOUND){
+                ok=false;
+                break;
+            }
             tmp.set(i, recordState.get(i)+ACCURATE*(recordState.get(i)-initState.get(i)));
             x+=getSigmoid(tmp.get(i));
             y+=getSigmoid(recordState.get(i));
             tmpChange.set(i, tmpChange.get(i)+ACCURATE*(recordState.get(i)-initState.get(i)));
         }
 
-        if(cmp(x,y)&&(meanBuckets-PRECISION<exp)) {
+        if(cmp(x,y)&&ok) {
             changeRecord = tmpChange;
             initState = recordState = tmp;
         }else {

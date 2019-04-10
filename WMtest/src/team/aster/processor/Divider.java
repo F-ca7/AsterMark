@@ -52,7 +52,6 @@ class Divider {
     }
 
 
-    //todo 用stream API做并行优化
     /****
      * 数据集划分
      * @param m 分组数
@@ -79,24 +78,4 @@ class Divider {
         return partitionedDataset;
     }
 
-//	public static void main(String[] args) {
-//		Map<String,Object>map = new HashMap<String,Object>();
-//		ArrayList<String> a1 = new ArrayList<String>();
-//		ArrayList<String> a2 = new ArrayList<String>();
-//		ArrayList<String> a3 = new ArrayList<String>();
-//		ArrayList<String> a4 = new ArrayList<String>();
-//		for(int i=0;i<1;i++) {
-//			a1.add(new Timer().toString()+"");
-//			a2.add(new Timer().toString()+"");
-//			a3.add(new Timer().toString()+"");
-//			a4.add(new Timer().toString()+"");
-//		}
-//		map.put("a1", a1);
-//		map.put("a2", a2);
-//		map.put("a3", a3);
-//		map.put("a4", a4);
-//		Map<Integer,Object> tmp = Divider.divide(4, map, "vb7d3yf21e");
-//		//System.out.println(map);
-//		System.out.println(tmp);
-//	}
 }

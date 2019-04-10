@@ -65,10 +65,10 @@ public class Simulator {
         // 发布数据集
         //publishTable(dbController);
         // 模拟攻击
-        //simulateAttack(dbController, Attack.DELETION);
+        simulateAttack(dbController, Attack.DELETION);
         // 提取水印
-        //String extractedWatermark = extraWatermark(dbController, wmProcessor.getDecoder());
-        String extractedWatermark = extraWatermark(dbController, wmProcessor.getDecoder(), dbController.getDatasetWithPK());
+        //String extractedWatermark = extractWatermark(dbController, wmProcessor.getDecoder());
+        String extractedWatermark = extractWatermark(dbController, wmProcessor.getDecoder(), dbController.getDatasetWithPK());
 
         //对提取水印溯源
         String target = identifyOrigin(getDbTableName(), extractedWatermark);
@@ -83,7 +83,8 @@ public class Simulator {
         encoder.setStoredKeyBuilder(storedKeyBuilder);
 
         // 初始化约束条件, 约束条件由客户自定义
-        ColumnDataConstraint dataConstraint = new ColumnDataConstraint(ConstraintType.DOUBLE, -300, 300, -2);
+        ColumnDataConstraint dataConstraint = new ColumnDataConstraint(ConstraintType.DOUBLE, -300, 300, 2);
+        logger.info("约束条件为: {}", dataConstraint.toString());
         encoder.setDataConstraint(dataConstraint);
     }
 
@@ -150,7 +151,7 @@ public class Simulator {
      * @param datasetWithPK	 已嵌入水印的数据集
      * @return java.lang.String 水印
      */
-    private static String extraWatermark(MainDbController dbController, IDecoder decoder, DatasetWithPK datasetWithPK) {
+    private static String extractWatermark(MainDbController dbController, IDecoder decoder, DatasetWithPK datasetWithPK) {
         System.out.println("开始提取水印...");
         //获取对应的各个秘钥、秘参
         StoredKey storedKey = SecretKeyDbController.getInstance().getStoredKeyByDbTable(getDbTableName());
@@ -237,7 +238,7 @@ public class Simulator {
         logger.info("开始模拟删除攻击...");
 
         startTime = System.currentTimeMillis();
-        dbController.randomDeletion(deletionPercent);
+        dbController.randomDeletionInDataset(deletionPercent);
         endTime = System.currentTimeMillis();
 
         logger.info("删除完毕");
@@ -247,7 +248,7 @@ public class Simulator {
 
     // 从发布数据库中
     // 得到发布的数据集并提取水印
-    private static String extraWatermark(MainDbController dbController, IDecoder decoder){
+    private static String extractWatermark(MainDbController dbController, IDecoder decoder){
         logger.info("开始提取水印...");
 
         //获取对应的各个秘钥、秘参

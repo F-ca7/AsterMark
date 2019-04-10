@@ -5,9 +5,7 @@ import team.aster.utils.Constants;
 import team.aster.utils.Constants.MysqlDbConfig;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 
 public class MainDbController {
@@ -104,6 +102,11 @@ public class MainDbController {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+
+    public void randomDeletionInDataset(double deletionPercent){
+        datasetWithPK.randomDelete(deletionPercent);
     }
 
     /**

@@ -62,14 +62,14 @@ public class OptimEncoder extends IEncoderNumericImpl {
         assert waterMark != null;
         double threshold = encodeAllBits(partitionedDataset, waterMark.getBinary());
 
-        //打印maxList和minList
+        // 打印maxList和minList
         logger.debug("maxList: {}", maxList);
         logger.debug("minList: {}", minList);
 
-        //补充完秘钥信息
+        // 补充完秘钥信息
         completeStoredKey(secreteCode, threshold, waterMark);
         StoredKey storedKey = storedKeyBuilder.build();
-        //保存水印信息
+        // 保存水印信息
         SecretKeyDbController.getInstance().saveStoredKeysToDB(storedKey);
         logger.info("秘钥信息为 {}", storedKey.toString());
 
@@ -153,11 +153,23 @@ public class OptimEncoder extends IEncoderNumericImpl {
 
         ArrayList<Double> modifiedCol = optimization.getModifiedColumn();
 
+        // 格式化输出的占位符设置
+        String placeholder = null;
+        switch (dataConstraint.getConstraintType()){
+            case INTEGER:
+                placeholder = "%.0f";
+                break;
+            case DOUBLE:
+                placeholder = "%."+dataConstraint.getPrecision()+"f";
+                break;
+        }
+
         // 写回partition
         int rowIndex = 0;
         String resultStr;
         for(ArrayList<String> row: partition){
-            resultStr = String.format("%.2f", modifiedCol.get(rowIndex));
+            resultStr = String.format(placeholder, modifiedCol.get(rowIndex));
+
             //System.out.println("将原来的"+row.get(COL_INDEX)+"改为"+resultStr);
             row.set(COL_INDEX, resultStr);
             rowIndex++;
@@ -171,12 +183,6 @@ public class OptimEncoder extends IEncoderNumericImpl {
         return "Optimization based Encoder";
     }
 
-    @Override
-    public void completeStoredKey(String secretCode,double threshold, WaterMark waterMark) {
-        storedKeyBuilder.setSecretCode(secretCode);
-        storedKeyBuilder.setThreshold(threshold);
-        storedKeyBuilder.setWaterMark(waterMark);
-        storedKeyBuilder.setWmLength(waterMark.getLength());
-    }
+
 }
 

@@ -1,9 +1,7 @@
 package team.aster.model;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @ClassName DatasetWithPK
@@ -65,6 +63,26 @@ public class DatasetWithPK {
             }
         }
         return isSuccess;
+    }
+
+    public void randomDelete(double delPercent){
+        int delSize = (int)(delPercent*dataset.size());
+        Random random = new Random();
+        System.out.printf("从dataset随机删除%d条%n", delSize);
+        int count = 0;
+        int randNum;
+        while (count<delSize){
+            for (Iterator<Map.Entry<String, ArrayList<String>>> it = dataset.entrySet().iterator();
+            it.hasNext();){
+                it.next();
+                randNum = random.nextInt(10);
+                if (randNum<4 && count<delSize){
+                    it.remove();
+                    count++;
+                }
+            }
+        }
+        System.out.println("现在还剩" + dataset.size());
     }
 
     public Map<String, ArrayList<String>> getDataset() {

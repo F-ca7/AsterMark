@@ -22,7 +22,12 @@ public abstract class IEncoderNumericImpl implements IEncoder {
 
 
 
-    abstract public void completeStoredKey(String secretCode,double threshold, WaterMark waterMark);
+    public void completeStoredKey(String secretCode,double threshold, WaterMark waterMark){
+        storedKeyBuilder.setSecretCode(secretCode);
+        storedKeyBuilder.setThreshold(threshold);
+        storedKeyBuilder.setWaterMark(waterMark);
+        storedKeyBuilder.setWmLength(waterMark.getLength());
+    }
 
     // 如果约束不为数值型，抛出非法参数异常
     public void setDataConstraint(ColumnDataConstraint dataConstraint) throws IllegalArgumentException {

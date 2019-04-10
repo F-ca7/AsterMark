@@ -51,7 +51,7 @@ public class Constants {
 
     public static class PublishDbInfo {
         public final static String PUBLISH_TABLE_NAME = "transaction_2013_published"; //发布的表名
-        public final static double DELETION_PERCENT = 0.1;
+        public final static double DELETION_PERCENT = 0.2;
     }
 
     public static class StoredKeyDbInfo {

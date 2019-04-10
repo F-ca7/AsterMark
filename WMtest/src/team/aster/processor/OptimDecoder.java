@@ -66,6 +66,7 @@ public class OptimDecoder implements IDecoder {
     @Override
     public String decode(DatasetWithPK datasetWithPK) {
         String decodedWatermark;
+        logger.info("解码使用的元组数有 {}", datasetWithPK.getDataset().size());
         decodedWatermark = detectWatermark(Divider.divide(partitionCount, datasetWithPK, secretCode));
         logger.info("解码出来的水印为: {}" , decodedWatermark);
         return decodedWatermark;
