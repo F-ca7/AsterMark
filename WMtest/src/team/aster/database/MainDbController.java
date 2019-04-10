@@ -174,7 +174,7 @@ public class MainDbController {
     }
 
 
-    public boolean publiahDatasetFromFile(String filepath){
+    public boolean publishDatasetFromFile(String filepath){
         boolean isSuccess;
         String uuid = UUID.randomUUID().toString().replaceAll("-","").substring(0,10);
         String publishName = publishTableName + "_"+uuid;

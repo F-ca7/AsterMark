@@ -1,5 +1,7 @@
 package team.aster.processor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import team.aster.algorithm.GenericOptimization;
 import team.aster.model.DatasetWithPK;
 import team.aster.model.PartitionedDataset;
@@ -10,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class OptimDecoder implements IDecoder {
+    private static Logger logger = LoggerFactory.getLogger(OptimDecoder.class);
+
     //这些变量是通过数据库读入的
     private int partitionCount;
     private int wmLength;
@@ -56,14 +60,14 @@ public class OptimDecoder implements IDecoder {
         setThreshold(storedKey.getThreshold());
         setSecretKey(storedKey.getSecretKey());
         setWmLength(storedKey.getWmLength());
-        System.out.println("使用secretCode为"+secretCode);
+        logger.debug("使用secretCode为 {}", secretCode);
     }
 
     @Override
     public String decode(DatasetWithPK datasetWithPK) {
         String decodedWatermark;
         decodedWatermark = detectWatermark(Divider.divide(partitionCount, datasetWithPK, secretCode));
-        System.out.println("解码出来的水印为：" + decodedWatermark);
+        logger.info("解码出来的水印为: {}" , decodedWatermark);
         return decodedWatermark;
     }
 
@@ -89,7 +93,7 @@ public class OptimDecoder implements IDecoder {
         });
 
         //据ones和zeros生成水印
-        StringBuffer wm = new StringBuffer();
+        StringBuilder wm = new StringBuilder();
         for(int i=0;i<wmLength;i++){
             if(ones[i]>zeros[i]){
                 wm.append("1");

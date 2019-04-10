@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
 
-public class PrimLSBEncoder extends IEncoderImpl {
+public class PrimLSBEncoder extends IEncoderNumericImpl {
     private static final int COL_INDEX = Constants.EmbedDbInfo.EMBED_COL_INDEX-1;
     private static final int PARTITION_COUNT = Constants.EmbedDbInfo.PARTITION_COUNT;
     private static final double VAR_BOUND_RATIO = 0.1;     //一个数值的最大变化比例
@@ -35,8 +35,7 @@ public class PrimLSBEncoder extends IEncoderImpl {
         //保存水印信息
         //TODO 此处逻辑有问题他，dbtable和target不应在这里
         StoredKey storedKey = new StoredKey.Builder()
-                .setDbTable(dbTable)
-                .setTarget(target).setPartitionCount(PARTITION_COUNT)
+                .setPartitionCount(PARTITION_COUNT)
                 .setWaterMark(waterMark).setWmLength(waterMark.getLength())
                 .setSecretCode(secreteCode)
                 .build();
@@ -113,5 +112,10 @@ public class PrimLSBEncoder extends IEncoderImpl {
             row.set(COL_INDEX, resultStr);
             rowIndex++;
         }
+    }
+
+    @Override
+    public void completeStoredKey(String secretCode, double threshold, WaterMark waterMark) {
+
     }
 }

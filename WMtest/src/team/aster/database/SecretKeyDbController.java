@@ -1,5 +1,7 @@
 package team.aster.database;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import team.aster.model.StoredKey;
 import team.aster.utils.BinaryUtils;
 
@@ -22,6 +24,7 @@ import static team.aster.utils.Constants.StoredKeyDbInfo;
  * @date 2019/4/2 10:54
  */
 public class SecretKeyDbController {
+    private static Logger logger = LoggerFactory.getLogger(SecretKeyDbController.class);
 
     private final static String DRIVER_NAME = MysqlDbConfig.DRIVER_NAME;
     private final static String DB_NAME = MysqlDbConfig.STORED_KEY_DB_NAME;
@@ -90,8 +93,7 @@ public class SecretKeyDbController {
             }
             pstmt.close();
             rs.close();
-            System.out.println("已存在水印集为");
-            System.out.println(wmList);
+            logger.info("已存在水印集为 {}", wmList);
             return wmList;
         } catch (SQLException e) {
             System.out.println("SQL错误");
@@ -124,12 +126,12 @@ public class SecretKeyDbController {
             }
             pstmt.close();
             rs.close();
-            System.out.println("已存在水印集为");
-            System.out.println(wmListMap);
+            logger.info("已存在水印集为 {}", wmListMap);
         } catch (SQLException e) {
-            System.out.println("SQL错误");
+            logger.error("SQL错误 {}", e.getSQLState());
             e.printStackTrace();
         } catch (Exception e){
+            logger.error(e.getMessage());
             e.printStackTrace();
         }
         AtomicReference<Double> similarity = new AtomicReference<>(0.0);
@@ -141,7 +143,7 @@ public class SecretKeyDbController {
                 result.set(v);
             }
         });
-        System.out.println("相似度为"+similarity+", 结果为"+result);
+        logger.info("相似度为 {}, 结果为 {}", similarity, result);
         return result.get();
     }
 
@@ -164,12 +166,13 @@ public class SecretKeyDbController {
             //System.out.println(pstmt);
             pstmt.executeUpdate();
 
-            System.out.println("保存水印参数数据成功！");
+            logger.info("保存水印参数数据成功！");
             pstmt.close();
         } catch (SQLException e) {
-            System.out.println("SQL错误");
+            logger.error("SQL错误 {}", e.getSQLState());
             e.printStackTrace();
         } catch (Exception e){
+            logger.error(e.getMessage());
             e.printStackTrace();
         }
     }

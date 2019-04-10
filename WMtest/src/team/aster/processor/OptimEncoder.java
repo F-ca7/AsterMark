@@ -1,5 +1,7 @@
 package team.aster.processor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import team.aster.algorithm.GenericOptimization;
 import team.aster.algorithm.OptimizationAlgorithm;
 import team.aster.algorithm.PatternSearch;
@@ -13,18 +15,18 @@ import team.aster.utils.Constants;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class OptimEncoder extends IEncoderImpl {
+public class OptimEncoder extends IEncoderNumericImpl {
+    private static Logger logger = LoggerFactory.getLogger(OptimDecoder.class);
+
     private ArrayList<Double> minList = new ArrayList<>();
     private ArrayList<Double> maxList = new ArrayList<>();
 
     //先只对一列进行嵌入水印，这里是最后一列FLATLOSE 转让盈亏(已扣税)
     //但是这里还是不太科学
     private static final int COL_INDEX = Constants.EmbedDbInfo.EMBED_COL_INDEX-1;
-    private static final int MIN_PART_LENGTH = 10;
-    private static final double SECRET_KEY = 0.1;
-    private static final int PARTITION_COUNT = Constants.EmbedDbInfo.PARTITION_COUNT;
+    private static final int PK_INDEX = Constants.EmbedDbInfo.PK_COL_INDEX-1;
 
-    private double threshold;
+    private static final int PARTITION_COUNT = Constants.EmbedDbInfo.PARTITION_COUNT;
 
 
     public ArrayList<Double> getMinList() {
@@ -35,52 +37,51 @@ public class OptimEncoder extends IEncoderImpl {
         return maxList;
     }
 
-    public double getThreshold() {
-        return threshold;
-    }
 
+    /**
+     * @Description 对带主键的数据集嵌入水印
+     * @author Fcat
+     * @date 2019/4/9 21:04
+     * @param datasetWithPK	带主键的数据集
+     * @param watermarkList	已存在的水印列表，防止相似度高而碰撞
+     */
     @Override
     public void encode(DatasetWithPK datasetWithPK, ArrayList<String> watermarkList) {
-        System.out.println(this.toString()+"开始工作");
+        logger.debug("{} 开始工作", this.toString());
+
         //根据数据库表名生成secretCode
-        String secreteCode = SecretCodeGenerator.getSecretCode(dbTable);
+        String secreteCode = SecretCodeGenerator.getSecretCode(storedKeyBuilder.getDbTable());
         //对datasetWithPK进行划分
         PartitionedDataset partitionedDataset = Divider.divide(PARTITION_COUNT, datasetWithPK, secreteCode);
 
-        System.out.printf("预期划分数为%d，实际划分数为%d%n", PARTITION_COUNT, partitionedDataset.getPartitionedDataset().keySet().size());
+        logger.debug("预期划分数为{}，实际划分数为{}", PARTITION_COUNT, partitionedDataset.getPartitionedDataset().keySet().size());
 
         //生成水印
         WaterMark waterMark = WaterMarkGenerator.getWaterMark(watermarkList);
-
+        //嵌入水印所有位
         assert waterMark != null;
-        encodeAllBits(partitionedDataset, waterMark.getBinary());
+        double threshold = encodeAllBits(partitionedDataset, waterMark.getBinary());
 
         //打印maxList和minList
-        System.out.println("maxList:");
-        System.out.println(maxList);
-        System.out.println("minList:");
-        System.out.println(minList);
+        logger.debug("maxList: {}", maxList);
+        logger.debug("minList: {}", minList);
 
+        //补充完秘钥信息
+        completeStoredKey(secreteCode, threshold, waterMark);
+        StoredKey storedKey = storedKeyBuilder.build();
         //保存水印信息
-        //todo 是否不应该交给它来保存秘钥信息
-        //TODO 此处逻辑有问题他，dbtable和target不应在这里
-        StoredKey storedKey = new StoredKey.Builder()
-                .setDbTable(dbTable).setMinLength(MIN_PART_LENGTH)
-                .setSecretKey(SECRET_KEY).setThreshold(threshold)
-                .setTarget(target).setPartitionCount(PARTITION_COUNT)
-                .setWaterMark(waterMark).setWmLength(waterMark.getLength())
-                .setSecretCode(secreteCode)
-                .build();
         SecretKeyDbController.getInstance().saveStoredKeysToDB(storedKey);
+        logger.info("秘钥信息为 {}", storedKey.toString());
+
 
         //更新数据
         Map<String, ArrayList<String>> ds = datasetWithPK.getDataset();
         //先清空原来的datasetWithPK
         ds.clear();
-        //把partitionedDataset更新回datasetWithPK，主键为每行的第一列(id)
+        //把partitionedDataset更新回datasetWithPK，map的key为主键值
         for(ArrayList<ArrayList<String>> rowSet: partitionedDataset.getPartitionedDataset().values()){
             for (ArrayList<String> row : rowSet){
-                ds.put(row.get(0), row);
+                ds.put(row.get(PK_INDEX), row);
             }
         }
     }
@@ -92,18 +93,19 @@ public class OptimEncoder extends IEncoderImpl {
      * @param partitionedDataset    整个划分好的数据集
      * @param watermark	    要水印串
      */
-    private void encodeAllBits(PartitionedDataset partitionedDataset, ArrayList<Integer> watermark){
+    private double encodeAllBits(PartitionedDataset partitionedDataset, ArrayList<Integer> watermark){
         System.out.println("开始嵌入水印所有位");
         Map<Integer, ArrayList<ArrayList<String>>> datasetWithIndex = partitionedDataset.getPartitionedDataset();
-        int wmLength = watermark.size();
+
+        final int wmLength = watermark.size();
         datasetWithIndex.forEach((k,v)->{
             int index = k%wmLength;
-            //System.out.printf("正在处理第%d个划分...\n嵌入水印位为第%d位\n", k, index);
             encodeSingleBit(v, index, watermark.get(index));
         });
-        //保存阈值T
-        threshold = GenericOptimization.calcOptimizedThreshold(minList, maxList);
-        System.out.println("阈值为：" + threshold);
+
+        double threshold = GenericOptimization.calcOptimizedThreshold(minList, maxList);
+        logger.debug("阈值为: {}", threshold);
+        return threshold;
     }
 
 
@@ -119,32 +121,39 @@ public class OptimEncoder extends IEncoderImpl {
     private void encodeSingleBit(ArrayList<ArrayList<String>> partition, int bitIndex, int bit){
         //System.out.printf("正在对第%d个字段嵌入水印的第%d位: %d%n", COL_INDEX +1, bitIndex, bit);
         ArrayList<Double> colValues = new ArrayList<>();
+
+
         for(ArrayList<String> row: partition){
+            // 只取一列数据
             double value = Double.valueOf(row.get(COL_INDEX));
             //System.out.printf("字段值为%f\n", value);
             colValues.add(value);
         }
         OptimizationAlgorithm optimization = new PatternSearch();
         double tmp;
+
+        double varLowerBound = dataConstraint.getVarLowerBound();
+        double varUpperBound = dataConstraint.getVarUpperBound();
+        // 该bit是0则将hiding函数最小化，是1则最大化
         switch (bit){
             case 0:
                 tmp = optimization.minimizeByHidingFunction(colValues,
-                        OptimizationAlgorithm.getHidingValue(colValues, Constants.StoredKeyDbInfo.SECRET_KEY), -300,300);
+                        OptimizationAlgorithm.getHidingValue(colValues, Constants.StoredKeyDbInfo.SECRET_KEY), varLowerBound, varUpperBound);
                 minList.add(tmp);
                 break;
             case 1:
                 tmp = optimization.maximizeByHidingFunction(colValues,
-                        OptimizationAlgorithm.getHidingValue(colValues, Constants.StoredKeyDbInfo.SECRET_KEY), -300,300);
+                        OptimizationAlgorithm.getHidingValue(colValues, Constants.StoredKeyDbInfo.SECRET_KEY), varLowerBound, varUpperBound);
                 maxList.add(tmp);
                 break;
             default:
-                System.out.println("水印出错！");
+                logger.error("水印出错! ");
                 break;
         }
 
         ArrayList<Double> modifiedCol = optimization.getModifiedColumn();
 
-        //写回partition
+        // 写回partition
         int rowIndex = 0;
         String resultStr;
         for(ArrayList<String> row: partition){
@@ -153,9 +162,7 @@ public class OptimEncoder extends IEncoderImpl {
             row.set(COL_INDEX, resultStr);
             rowIndex++;
         }
-
     }
-
 
 
 
@@ -164,5 +171,12 @@ public class OptimEncoder extends IEncoderImpl {
         return "Optimization based Encoder";
     }
 
+    @Override
+    public void completeStoredKey(String secretCode,double threshold, WaterMark waterMark) {
+        storedKeyBuilder.setSecretCode(secretCode);
+        storedKeyBuilder.setThreshold(threshold);
+        storedKeyBuilder.setWaterMark(waterMark);
+        storedKeyBuilder.setWmLength(waterMark.getLength());
+    }
 }
 

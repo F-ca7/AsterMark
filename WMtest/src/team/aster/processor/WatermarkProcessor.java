@@ -5,7 +5,7 @@ import team.aster.model.DatasetWithPK;
 import java.util.ArrayList;
 
 public abstract class WatermarkProcessor {
-    IEncoderImpl encoder;
+    IEncoderNumericImpl encoder;
     IDecoder decoder;
 
     public void encodeDB(DatasetWithPK datasetWithPK, ArrayList<String> watermarkList){
@@ -18,7 +18,7 @@ public abstract class WatermarkProcessor {
         return decoder.decode(datasetWithPK);
     }
 
-    public IEncoderImpl getEncoder() {
+    public IEncoderNumericImpl getEncoder() {
         return encoder;
     }
 

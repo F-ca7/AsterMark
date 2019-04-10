@@ -23,6 +23,21 @@ public class StoredKey {
     //共享数据对象方
     private String target;
 
+    @Override
+    public String toString() {
+        return "StoredKey{" +
+                "waterMark=" + waterMark +
+                ", partitionCount=" + partitionCount +
+                ", wmLength=" + wmLength +
+                ", threshold=" + threshold +
+                ", secretKey=" + secretKey +
+                ", secretCode='" + secretCode + '\'' +
+                ", minLength=" + minLength +
+                ", dbTable='" + dbTable + '\'' +
+                ", target='" + target + '\'' +
+                '}';
+    }
+
     private StoredKey(Builder builder){
         this.waterMark = builder.waterMark;
         this.partitionCount = builder.partitionCount;
@@ -40,6 +55,43 @@ public class StoredKey {
         private WaterMark waterMark;
         private int partitionCount;
         private int wmLength;
+
+        public WaterMark getWaterMark() {
+            return waterMark;
+        }
+
+        public int getPartitionCount() {
+            return partitionCount;
+        }
+
+        public int getWmLength() {
+            return wmLength;
+        }
+
+        public double getThreshold() {
+            return threshold;
+        }
+
+        public double getSecretKey() {
+            return secretKey;
+        }
+
+        public String getSecretCode() {
+            return secretCode;
+        }
+
+        public int getMinLength() {
+            return minLength;
+        }
+
+        public String getDbTable() {
+            return dbTable;
+        }
+
+        public String getTarget() {
+            return target;
+        }
+
         private double threshold;
         private double secretKey;
         private String secretCode;
