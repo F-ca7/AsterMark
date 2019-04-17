@@ -25,7 +25,8 @@ public class SecretCodeGenerator {
 
 
 	static String getSecretCode(String srcStr){
-		int n = srcStr.hashCode();
+		// hashCode可能为负
+		int n = Math.abs(srcStr.hashCode());
 		int size = CODES.length;
 		StringBuilder code= new StringBuilder();
 		for (; n>0; n/=size){

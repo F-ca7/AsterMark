@@ -16,7 +16,6 @@ public abstract class IEncoderNumericImpl implements IEncoder {
     StoredKey.Builder storedKeyBuilder;
 
 
-
     // 编码器对应的约束
     ColumnDataConstraint dataConstraint;
 

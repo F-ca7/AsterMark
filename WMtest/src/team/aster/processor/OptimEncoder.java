@@ -25,7 +25,6 @@ public class OptimEncoder extends IEncoderNumericImpl {
     //但是这里还是不太科学
     private static final int COL_INDEX = Constants.EmbedDbInfo.EMBED_COL_INDEX-1;
     private static final int PK_INDEX = Constants.EmbedDbInfo.PK_COL_INDEX-1;
-
     private static final int PARTITION_COUNT = Constants.EmbedDbInfo.PARTITION_COUNT;
 
 
@@ -38,19 +37,14 @@ public class OptimEncoder extends IEncoderNumericImpl {
     }
 
 
-    /**
-     * @Description 对带主键的数据集嵌入水印
-     * @author Fcat
-     * @date 2019/4/9 21:04
-     * @param datasetWithPK	带主键的数据集
-     * @param watermarkList	已存在的水印列表，防止相似度高而碰撞
-     */
+
     @Override
     public void encode(DatasetWithPK datasetWithPK, ArrayList<String> watermarkList) {
         logger.debug("{} 开始工作", this.toString());
 
         //根据数据库表名生成secretCode
         String secreteCode = SecretCodeGenerator.getSecretCode(storedKeyBuilder.getDbTable());
+        logger.debug("secreteCode为 {}", secreteCode);
         //对datasetWithPK进行划分
         PartitionedDataset partitionedDataset = Divider.divide(PARTITION_COUNT, datasetWithPK, secreteCode);
 
@@ -91,7 +85,7 @@ public class OptimEncoder extends IEncoderNumericImpl {
      * @author Fcat
      * @date 2019/3/24 16:47
      * @param partitionedDataset    整个划分好的数据集
-     * @param watermark	    要水印串
+     * @param watermark	    要嵌入的水印串
      */
     private double encodeAllBits(PartitionedDataset partitionedDataset, ArrayList<Integer> watermark){
         System.out.println("开始嵌入水印所有位");
@@ -126,7 +120,6 @@ public class OptimEncoder extends IEncoderNumericImpl {
         for(ArrayList<String> row: partition){
             // 只取一列数据
             double value = Double.valueOf(row.get(COL_INDEX));
-            //System.out.printf("字段值为%f\n", value);
             colValues.add(value);
         }
         OptimizationAlgorithm optimization = new PatternSearch();

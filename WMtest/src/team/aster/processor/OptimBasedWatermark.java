@@ -9,6 +9,6 @@ class OptimBasedWatermark extends WatermarkProcessor {
 
     @Override
     public String toString() {
-        return "Optimization Based team.aster.processor";
+        return "OptimBasedWatermark{}";
     }
 }

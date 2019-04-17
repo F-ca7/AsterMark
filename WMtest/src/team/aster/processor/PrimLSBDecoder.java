@@ -17,6 +17,7 @@ public class PrimLSBDecoder implements IDecoder {
     private final int PK_INDEX = Constants.EmbedDbInfo.PK_COL_INDEX-1;
     private DatasetWithPK originDatasetWithPK;
 
+    @Override
     public void setStoredKeyParams(StoredKey storedKey){
         setPartitionCount(storedKey.getPartitionCount());
         setSecretCode(storedKey.getSecretCode());

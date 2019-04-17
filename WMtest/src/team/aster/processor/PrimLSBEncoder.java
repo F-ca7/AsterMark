@@ -24,7 +24,7 @@ public class PrimLSBEncoder extends IEncoderNumericImpl {
 
     @Override
     public void encode(DatasetWithPK datasetWithPK, ArrayList<String> watermarkList) {
-        System.out.println(this.toString()+"开始工作");
+        logger.info(this.toString()+"开始工作");
         String secreteCode = SecretCodeGenerator.getSecretCode(10);
         //对datasetWithPK进行划分
         PartitionedDataset partitionedDataset = Divider.divide(PARTITION_COUNT, datasetWithPK, secreteCode);
@@ -55,12 +55,12 @@ public class PrimLSBEncoder extends IEncoderNumericImpl {
     }
 
     private void encodeAllBits(PartitionedDataset partitionedDataset, ArrayList<Integer> watermark) {
-        System.out.println("开始嵌入水印所有位");
+        logger.info("开始嵌入水印所有位");
         Map<Integer, ArrayList<ArrayList<String>>> datasetWithIndex = partitionedDataset.getPartitionedDataset();
         int wmLength = watermark.size();
         datasetWithIndex.forEach((k,v)->{
             int index = k%wmLength;
-            System.out.printf("正在处理第%d个划分...\n嵌入水印位为第%d位\n", k, index);
+            //System.out.printf("正在处理第%d个划分...\n嵌入水印位为第%d位\n", k, index);
             encodeSingleBit(v, index, watermark.get(index));
         });
     }

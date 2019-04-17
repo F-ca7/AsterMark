@@ -20,6 +20,10 @@ public class WatermarkFactory {
                 return new OptimBasedWatermark();
             case PRIMITIVE_LSB:
                 return new PrimitiveLSBWatermark();
+            case SPACE:
+                return new SpaceBasedWatermark();
+            case PUNCTUATION:
+                return new PunctuationBasedWatermark();
             default:
                 return null;
         }

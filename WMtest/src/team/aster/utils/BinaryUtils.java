@@ -1,6 +1,7 @@
 package team.aster.utils;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class BinaryUtils {
     private BinaryUtils(){}
@@ -25,7 +26,7 @@ public class BinaryUtils {
             return 0;
         }
         for(int i=0;i<length;i++) {
-            if(checkedBinary.get(i)==existedBinary.get(i)) {
+            if(Objects.equals(checkedBinary.get(i), existedBinary.get(i))) {
                 sameNum++;
             }
         }

@@ -117,7 +117,6 @@ public class SecretKeyDbController {
         //k:watermark, v:target
         Map<String, String> wmListMap = new HashMap<>();
         try {
-            //todo 查询已存在的水印
             String querySql = String.format("SELECT watermark,target FROM %s WHERE db_table='%s'", TABLE_NAME, dbTable);
             PreparedStatement pstmt = conn.prepareStatement(querySql);
             ResultSet rs = pstmt.executeQuery();

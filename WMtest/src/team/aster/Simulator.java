@@ -35,7 +35,7 @@ public class Simulator {
     private final static int FETCH_COUNT = EmbedDbInfo.FETCH_COUNT;
 
     //使用的水印处理器类型
-    private final static WatermarkProcessorType WATERMARK_PROCESSOR_TYPE = WatermarkProcessorType.OPTIMIZATION;
+    private final static WatermarkProcessorType WATERMARK_PROCESSOR_TYPE = WatermarkProcessorType.PUNCTUATION;
 
     //记录过程耗时
     private static long startTime;
@@ -67,7 +67,7 @@ public class Simulator {
         // 模拟攻击
         simulateAttack(dbController, Attack.DELETION);
         // 提取水印
-        //String extractedWatermark = extractWatermark(dbController, wmProcessor.getDecoder());
+//        String extractedWatermark = extractWatermark(dbController, wmProcessor.getDecoder());
         String extractedWatermark = extractWatermark(dbController, wmProcessor.getDecoder(), dbController.getDatasetWithPK());
 
         //对提取水印溯源
@@ -77,13 +77,13 @@ public class Simulator {
     }
 
     // 初始化水印处理器配置
-    private static void initEncoderConfig(IEncoderNumericImpl encoder) {
+    private static void initEncoderConfig(IEncoder encoder) {
         // 初始化秘钥信息
         StoredKey.Builder storedKeyBuilder = generateStoredKey();
         encoder.setStoredKeyBuilder(storedKeyBuilder);
 
         // 初始化约束条件, 约束条件由客户自定义
-        ColumnDataConstraint dataConstraint = new ColumnDataConstraint(ConstraintType.DOUBLE, -300, 300, 2);
+        ColumnDataConstraint dataConstraint = new ColumnDataConstraint(ConstraintType.DOUBLE, -25, 25, 2);
         logger.info("约束条件为: {}", dataConstraint.toString());
         encoder.setDataConstraint(dataConstraint);
     }
@@ -156,9 +156,8 @@ public class Simulator {
         //获取对应的各个秘钥、秘参
         StoredKey storedKey = SecretKeyDbController.getInstance().getStoredKeyByDbTable(getDbTableName());
         //设置解码时的参数
-        OptimDecoder optimDecoder = (OptimDecoder) decoder;
-        optimDecoder.setStoredKeyParams(storedKey);
-        return optimDecoder.decode(datasetWithPK);
+        decoder.setStoredKeyParams(storedKey);
+        return decoder.decode(datasetWithPK);
     }
 
 
@@ -200,7 +199,7 @@ public class Simulator {
     }
 
 
-    private static void embedWatermark(MainDbController dbController, IEncoderNumericImpl encoder){
+    private static void embedWatermark(MainDbController dbController, IEncoder encoder){
 
         logger.info("开始嵌入水印...");
 
@@ -253,22 +252,20 @@ public class Simulator {
 
         //获取对应的各个秘钥、秘参
         StoredKey storedKey = SecretKeyDbController.getInstance().getStoredKeyByDbTable(getDbTableName());
-
+        decoder.setStoredKeyParams(storedKey);
         if (decoder instanceof OptimDecoder){
             //设置解码时的参数
             OptimDecoder optimDecoder = (OptimDecoder) decoder;
-            optimDecoder.setStoredKeyParams(storedKey);
             return optimDecoder.decode(dbController.getPublishedDatasetWithPK());
 
         }else if(decoder instanceof PrimLSBDecoder){
             PrimLSBDecoder primLSBDecoder = (PrimLSBDecoder) decoder;
-            primLSBDecoder.setStoredKeyParams(storedKey);
             primLSBDecoder.setOriginDatasetWithPK(dbController.getOriginDatasetWithPK());
             return primLSBDecoder.decode(dbController.getPublishedDatasetWithPK());
-
+        }else {
+            return decoder.decode(dbController.getPublishedDatasetWithPK());
         }
-        logger.error("提取水印为空!");
-        return "empty!";
+
     }
 
     private static String identifyOrigin(String dbTable, String watermark){

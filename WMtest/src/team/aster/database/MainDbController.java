@@ -38,15 +38,14 @@ public class MainDbController {
      */
     public void fetchDataset(){
         //todo 后期再扩展
-        //String pkField1 = "FDATE";
-        //String pkField2 = "FTIME";
         if(conn == null){
             System.out.println("尚未连接数据库!");
             return;
         }
         String querySql = String.format("SELECT * FROM %s LIMIT %d", originTableName, fetchCount);
+        PreparedStatement pstmt = null;
         try {
-            PreparedStatement pstmt = conn.prepareStatement(querySql);
+            pstmt = conn.prepareStatement(querySql);
             ResultSet rs = pstmt.executeQuery();
             //获取该表的总列数
             ResultSetMetaData rsMetadata = rs.getMetaData();
@@ -72,6 +71,14 @@ public class MainDbController {
             rs.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if (pstmt!=null){
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -115,29 +122,42 @@ public class MainDbController {
      * @date 2019/4/1 21:44
      */
     public void publishDataset(){
-        String insertSql = "INSERT INTO "+ publishTableName +
-                " VALUES (?, ?, ?, ?, ?, " +
-                "?, ?, ?, ?, ? ," +
-                "?, ?, ?, ?, ?)";
+        int columns = dataset.get(0).size();
+        String[] placeholders = new String[columns];
+        //动态拼接占位符
+        Arrays.fill(placeholders, "?");
+        String insertSql = String.format("INSERT INTO %s VALUES (%s)", publishTableName, String.join( ",",placeholders));
+        PreparedStatement pstmt =null;
         try {
-            PreparedStatement pstmt = conn.prepareStatement(insertSql);
+            pstmt = conn.prepareStatement(insertSql);
             System.out.println("发布数据集共有" + datasetWithPK.getDataset().values().size()+"行");
             Map<String, ArrayList<String>> dataset = datasetWithPK.getDataset();
-            dataset.forEach((k,v)->{
+            PreparedStatement finalPstmt = pstmt;
+            dataset.forEach((k, v)->{
                 try {
-                    pstmt.setString(1, k);
+                    finalPstmt.setString(1, k);
                     for (int i=0; i<v.size(); i++){
-                        pstmt.setString(i+1, v.get(i));
+                        finalPstmt.setString(i+1, v.get(i));
                     }
                     //System.out.println(pstmt);
-                    pstmt.executeUpdate();
+                    finalPstmt.addBatch();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
             });
+            // 批处理操作
+            pstmt.executeBatch();
             pstmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if (pstmt!=null){
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
     }
@@ -176,7 +196,7 @@ public class MainDbController {
         return pubDatasetWithPK;
     }
 
-
+    // 读取文件到数据库中保存
     public boolean publishDatasetFromFile(String filepath){
         boolean isSuccess;
         String uuid = UUID.randomUUID().toString().replaceAll("-","").substring(0,10);

@@ -20,12 +20,14 @@ public final class PatternSearch extends OptimizationAlgorithm{
     private ArrayList<Double> changeRecord;
     private double ALPHA = 8;
     private double REF;
-    public static double OREF;
+    static double OREF;
     private boolean IS_MAX;
     private double exp = -0.00001;
     private void setBound(double lower,double upper) {
-        UPPER_BOUND=upper;
-        LOWER_BOUND=lower;
+        UPPER_BOUND = upper;
+        LOWER_BOUND = lower;
+        double larger = Math.abs(lower)>Math.abs(upper)?Math.abs(lower):Math.abs(upper);
+        STEP_LENGTH = larger/2;
     }
     private void setRef(double ref) {
         REF = ref;

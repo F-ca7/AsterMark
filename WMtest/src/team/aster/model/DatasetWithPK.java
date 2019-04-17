@@ -39,10 +39,17 @@ public class DatasetWithPK {
              bufferedWriter = new BufferedWriter(
                     new OutputStreamWriter(new FileOutputStream(file)));
             String rowData = null;
+            String data = null;
             //不为空才进行输出操作
             if (!dataset.isEmpty()){
                 for(ArrayList<String> row: dataset.values()){
-                    rowData = String.join(",", row);
+                    // csv转义仅对副本修改
+                    ArrayList<String> rowCopy = new ArrayList<>(row);
+                    for(int i=0;i<row.size();i++){
+                        data = org.apache.commons.text.StringEscapeUtils.escapeCsv(rowCopy.get(i));
+                        rowCopy.set(i, data);
+                    }
+                    rowData = String.join(",", rowCopy);
                     bufferedWriter.append(rowData).append("\r\n");
                 }
             }
