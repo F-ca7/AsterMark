@@ -2,6 +2,7 @@ package team.aster.processor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import team.aster.algorithm.Divider;
 import team.aster.model.DatasetWithPK;
 import team.aster.model.PartitionedDataset;
 import team.aster.model.StoredKey;
@@ -55,7 +56,7 @@ public class PunctuationDecoder implements IDecoder {
 
         StringBuilder wm = new StringBuilder();
         for(int i=0;i<wmLength;i++){
-            logger.debug("第{}位 0的个数{}，1的个数{}", i, zeros[i], ones[i]);
+            //logger.debug("第{}位 0的个数{}，1的个数{}", i, zeros[i], ones[i]);
             if(ones[i]>zeros[i]){
                 wm.append("1");
             }else if(ones[i]<zeros[i]){

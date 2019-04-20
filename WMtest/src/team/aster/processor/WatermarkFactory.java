@@ -6,15 +6,14 @@ package team.aster.processor;
 public class WatermarkFactory {
 
     /**
-     * @Title: getWatermarkProcessor
-     * @Description: 通过工厂来返回不同类型的水印处理器
+     * @Title getWatermarkProcessor
+     * @Description 通过工厂来返回不同类型的水印处理器
      * @author Fcat
      * @date 2019/3/23
      * @param watermarkType 水印类型的枚举
      * @return team.aster.processor.WatermarkProcessor
      */
     public WatermarkProcessor getWatermarkProcessor(WatermarkProcessorType watermarkType){
-
         switch (watermarkType){
             case OPTIMIZATION:
                 return new OptimBasedWatermark();
@@ -24,6 +23,8 @@ public class WatermarkFactory {
                 return new SpaceBasedWatermark();
             case PUNCTUATION:
                 return new PunctuationBasedWatermark();
+            case PART_OF_SPEECH:
+                return new POSBasedWatermark();
             default:
                 return null;
         }

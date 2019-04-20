@@ -2,6 +2,7 @@ package team.aster.processor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import team.aster.algorithm.Divider;
 import team.aster.algorithm.GenericOptimization;
 import team.aster.algorithm.OptimizationAlgorithm;
 import team.aster.algorithm.PatternSearch;
@@ -147,10 +148,9 @@ public class OptimEncoder extends IEncoderNumericImpl {
         ArrayList<Double> modifiedCol = optimization.getModifiedColumn();
 
         // 格式化输出的占位符设置
-        String placeholder = null;
+        String placeholder = "%.0f";
         switch (dataConstraint.getConstraintType()){
             case INTEGER:
-                placeholder = "%.0f";
                 break;
             case DOUBLE:
                 placeholder = "%."+dataConstraint.getPrecision()+"f";

@@ -4,6 +4,7 @@ public enum WatermarkProcessorType{
     OPTIMIZATION,
     PRIMITIVE_LSB,
     SPACE,
-    PUNCTUATION
+    PUNCTUATION,
+    PART_OF_SPEECH
 }
 

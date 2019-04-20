@@ -33,6 +33,7 @@ public class Constants {
     public static class MysqlDbConfig {
         public static String DRIVER_NAME = "com.mysql.cj.jdbc.Driver";  //驱动名
         public static String URL = "jdbc:mysql://localhost:3306/";    //mysql的url
+        public static String URL_FORAMTTED = "jdbc:mysql://%s:%s/";    //mysql的url
         public static String USERNAME = "root";    //mysql的用户名
         public static String PASSWORD = "0000";    //mysql的密码 todo 后期加密
         public static String CONN_PARAM = "?useUnicode=true&characterEncoding=UTF-8" +
@@ -56,8 +57,8 @@ public class Constants {
         /*
          *   评论文本
          */
-        public final static int FETCH_COUNT = 2000;    //要获取的元组数
-        public final static int PARTITION_COUNT = 100;    //分组数
+        public final static int FETCH_COUNT = 1000;    //要获取的元组数
+        public final static int PARTITION_COUNT = 80;    //分组数
         public final static String EMBED_TABLE_NAME = "amazon_reviews";     //要嵌入的表名
         public final static int PK_COL_INDEX = 1;   //主键所在的列
         public final static int EMBED_COL_INDEX = 10;   //要嵌入的属性所在的列

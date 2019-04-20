@@ -35,7 +35,7 @@ public class Simulator {
     private final static int FETCH_COUNT = EmbedDbInfo.FETCH_COUNT;
 
     //使用的水印处理器类型
-    private final static WatermarkProcessorType WATERMARK_PROCESSOR_TYPE = WatermarkProcessorType.PUNCTUATION;
+    private final static WatermarkProcessorType WATERMARK_PROCESSOR_TYPE = WatermarkProcessorType.PART_OF_SPEECH;
 
     //记录过程耗时
     private static long startTime;
