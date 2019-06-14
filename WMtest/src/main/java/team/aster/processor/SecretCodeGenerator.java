@@ -57,7 +57,6 @@ public class SecretCodeGenerator {
 	public static String getSecretCode(int length, char[] codes) {
 		return getCodeString(length, codes);
 	}
-	
 
 	public static double getSecretKey(String str){
 		int len = str.length();

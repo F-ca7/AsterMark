@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>groupId</groupId>
-    <artifactId>WMtest</artifactId>
+    <artifactId>aster watermark app</artifactId>
     <version>1.0-SNAPSHOT</version>
     <build>
         <plugins>
@@ -68,6 +68,7 @@
             <version>1.6</version>
         </dependency>
 
+
         <!-- NLP的包-->
         <dependency>
             <groupId>edu.stanford.nlp</groupId>
@@ -80,13 +81,14 @@
             <version>3.9.2</version>
             <classifier>models</classifier>
         </dependency>
-        <!--  没有会报错      -->
-<!--        <dependency>-->
-<!--            <groupId>org.slf4j</groupId>-->
-<!--            <artifactId>slf4j-nop</artifactId>-->
-<!--            <version>1.7.2</version>-->
-<!--        </dependency>-->
 
+        <!-- csv处理-->
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-csv -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.6</version>
+        </dependency>
     </dependencies>
 
 
