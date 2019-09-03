@@ -20,7 +20,7 @@
 
 流程如下：
 
-![](E:/desktop/media/78156999baa7b837bafe7c9cac34fde5.png)
+![](https://s2.ax1x.com/2019/09/03/nkS3PU.png)
 
 Graph1
 
@@ -72,7 +72,7 @@ return **Si+Δi\***
 
 对于隐藏函数的选取，我们使用
 
-![](E:/desktop/media/979957b87229b57c534f98c73e5b5274.png)
+![](https://s2.ax1x.com/2019/09/03/nkSUq1.png)
 
 针对该函数进行的最大最小化求解，我们使用模式搜索算法。
 
@@ -88,6 +88,7 @@ Output: Partition **new_partition**
 while step_length \> precision,
 **accurate_direction** = [0,0,0,...,0]
 
+```
 searchByAxis:
 while **turn** \< **turn_num**
  for each data in the Si
@@ -100,7 +101,9 @@ while **turn** \< **turn_num**
  **accurate_direction**[origin_data's index] = 1
  **step_length** = **step_length\*decay_rate**
  **turn**++
+```
 
+```
 searchByPattern
  **new_partition** = **origin_partition** + **accurate\*accurate_direction**
  if **sigmoid**(**new_partition**)\>**sigmoid**(**origin_partition**) and
@@ -108,13 +111,10 @@ searchByPattern
  **origin_partition**= **new_partition**
  if **sigmoid**(**new_partition**)\>**sigmoid**(**origin_partition**) and
  **bit** = 0
- **origin_partition**= **new_partition**
+ **origin_partition**= **new_partition
+```
 
-对于估计函数sigmoid()
 
-它的图像如下
-
-![](E:/desktop/media/1291aafa4247b01860c5b8386135b901.png)
 
 **第三步：最优阈值求解：**
 
@@ -124,9 +124,7 @@ searchByPattern
 
 通过chi-square检测，并且服从正态分布。因此，最后化简可得
 
-![](E:/desktop/media/53489f17372981536766ee67995262ba.png)
-
-其中，分别代表嵌入水印位为0,1的分组的均值与方差
+![](https://s2.ax1x.com/2019/09/03/nkSrGD.png)
 
 ### 水印提取过程
 
@@ -144,10 +142,10 @@ Input: Watermarked data set **Dw**, Number of partitions **m**, Secret parameter
 
 Output: Detected watermark **Wd**
 
+```
 ones[0,...,**l-1**] = [0,...,0]
 zeros[0,...,**l-1**] = [0,...,0]
 **S0,...,Sm-1** = **get_partitions(Dw,Ks,m)**
-
 for j from 0 to **m-1**
  if( \|**Sj**\|\>= **ξ** )
  i = j mod **l**
@@ -163,4 +161,6 @@ else if ones[j]\<zeros[j]
  **Wd**[j]=0
 else
  **Wd**[j]='x'
-return **Wd**
+return **Wd
+```
+
