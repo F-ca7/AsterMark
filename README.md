@@ -1,4 +1,4 @@
-为研究与解决关系型数据库中的数据版权问题，我&Kun设计并开发了一款名为“AsterMark”、用于嵌入/提取关系型数据库水印的桌面应用软件。
+为研究与解决关系型数据库中的数据版权问题，我&Kun设计并开发了一款名为“AsterMark”、用于嵌入/提取关系型数据库水印的桌面应用软件。（获得[第八届中国软件杯一等奖](http://www.cnsoftbei.com/plus/view.php?aid=452)）
 
 1. 通过参考相关学术文献，对于数值型、文本型两大类型数据实现了共五种水印嵌入提取算法；
 2. 实现了LSB(最低有效位)修改算法，保证了数据可用性；
@@ -90,28 +90,26 @@ while step_length \> precision,
 
 ```
 searchByAxis:
-while **turn** \< **turn_num**
+while turn < turn_num
  for each data in the Si
- **new_data** = **origin_data** + **step_length**
- if **sigmoid**(**new_data**)\>**sigmoid**(**origin_data**) and **bit** = 1
- **origin_data** = **new_data**
- **accurate_direction**[origin_data's index] = 1
- if **sigmoid**(**new_data**)\<**sigmoid**(**origin_data**) and **bit** = 0
- **origin_data** = **new_data**
- **accurate_direction**[origin_data's index] = 1
- **step_length** = **step_length\*decay_rate**
- **turn**++
+ new_data = origin_data + step_length
+ if sigmoid(new_data) > sigmoid(origin_data) and bit == 1
+ origin_data = new_data
+ accurate_direction[origin_data's index] = 1
+ if sigmoid(new_data) < sigmoid**(origin_data) and bit == 0
+ origin_data = new_data
+ accurate_direction[origin_data's index] = 1
+ step_length = step_length\decay_rate
+ turn++
 ```
 
 ```
 searchByPattern
- **new_partition** = **origin_partition** + **accurate\*accurate_direction**
- if **sigmoid**(**new_partition**)\>**sigmoid**(**origin_partition**) and
- **bit** = 1
- **origin_partition**= **new_partition**
- if **sigmoid**(**new_partition**)\>**sigmoid**(**origin_partition**) and
- **bit** = 0
- **origin_partition**= **new_partition
+ new_partition = origin_partition + accurate\accurate_direction
+ if sigmoid(new_partition) > sigmoid(origin_partition) and bit = 1
+ 	origin_partition = new_partition
+ if sigmoid(new_partition) > sigmoid(origin_partition) andbit = 0
+ 	origin_partition = new_partition
 ```
 
 
@@ -143,24 +141,24 @@ Input: Watermarked data set **Dw**, Number of partitions **m**, Secret parameter
 Output: Detected watermark **Wd**
 
 ```
-ones[0,...,**l-1**] = [0,...,0]
-zeros[0,...,**l-1**] = [0,...,0]
-**S0,...,Sm-1** = **get_partitions(Dw,Ks,m)**
-for j from 0 to **m-1**
- if( \|**Sj**\|\>= **ξ** )
- i = j mod **l**
- value = **Θ( Sj, 0, c)**
- if value\>=**T\***
- ones[i] = ones[i] + 1
- else
- zeros[i] = zeros[i] + 1
-for j from 0 to **l-1**
-if ones[j]\>zeros[j]
- **Wd**[j]=1
-else if ones[j]\<zeros[j]
- **Wd**[j]=0
-else
- **Wd**[j]='x'
-return **Wd
+ones[0,..., l-1] = [0,...,0]
+zeros[0,..., l-1] = [0,...,0]
+S0,...,Sm-1 = get_partitions(Dw,Ks,m)
+for j from 0 to m-1
+	if( |Sj| >= ξ )
+    i = j mod l
+    value = Θ( Sj, 0, c)
+    if value >= T
+    	ones[i] = ones[i] + 1
+    else
+    	zeros[i] = zeros[i] + 1
+for j from 0 to l-1
+    if ones[j] > zeros[j]
+    	Wd[j]=1
+    else if ones[j] < zeros[j]
+    	Wd[j]=0
+    else
+   		Wd[j]='x'
+return Wd
 ```
 
