@@ -1,10 +1,19 @@
 package team.aster.algorithm;
 
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 
+/**
+ * 最优化算法抽象
+ */
 public abstract class OptimizationAlgorithm {
+    private static Logger logger =  LoggerFactory.getLogger(OptimizationAlgorithm.class);
 
     public abstract double maximizeByHidingFunction(ArrayList<Double> colValues, double ref, double lower, double upper);
     public abstract double minimizeByHidingFunction(ArrayList<Double> colValues, double ref, double lower, double upper);
@@ -12,26 +21,40 @@ public abstract class OptimizationAlgorithm {
 
 
     /**
-     * @Description 获取对应的hiding function的值
-     * @author Fcat
+     * 获取ref值，供sigmoid函数使用
+     * @author Fang
      * @date 2019/3/26 16:15
-     * @param colValues	一个字段的所有属性值
+     * @param colValues	一个字段的所有值
      * @param secretKey	秘参c
-     * @return double
+     * @update Kun-提出中位数分割法
      */
-    public static double getHidingValue(ArrayList<Double> colValues, double secretKey){
-        DescriptiveStatistics stats = new DescriptiveStatistics();
-        //把数组的值添加到统计量中
-        colValues.forEach(stats::addValue);
-        double mean = stats.getMean();
-        double varianceSqrt = Math.sqrt(stats.getVariance());
-        double ref = mean + secretKey*varianceSqrt;
-        double sum = 0;
-        for (double i:colValues){
-            sum += getSigmoid(i, ref);
-        }
-        return sum/(double)colValues.size();
+    public static double getRefValue(ArrayList<Double> colValues, double secretKey){
+//        DescriptiveStatistics stats = new DescriptiveStatistics();
+//        //把数组的值添加到统计量中
+//        colValues.forEach(stats::addValue);
+//        double mean = stats.getMean();
+//        double varianceSqrt = Math.sqrt(stats.getVariance());
+//        double ref = mean + secretKey*varianceSqrt;
+
+        ArrayList<Double> tmpList = new ArrayList<>(colValues);
+        tmpList.sort(Comparator.naturalOrder());
+        double mid = tmpList.get(colValues.size()/2);
+
+//        if (varianceSqrt>mean) {
+//
+//            // 若数据集过于分散，则进行均化处理
+//            double sum = 0;
+//            for (double i:colValues){
+//                sum += getSigmoid(i, ref);
+//            }
+//            logger.info("标准差大于均值，返回{}", sum/(double)colValues.size());
+//            return sum/(double)colValues.size();
+//        }
+        //logger.info("标准差小于均值，返回{}", mid);
+        return mid;
+
     }
+
 
     public static double getOHidingValue(ArrayList<Double> colValues, double secretKey){
         double sum = 0.0;
@@ -48,8 +71,9 @@ public abstract class OptimizationAlgorithm {
 
 
     /**
-     * @Description 计算最优化的阈值T,为了防止精度丢失导致的巨大误差，此处，阈值计算约为meanMax与meanMin的均值
-     * @author Fcat
+     * 计算最优化的阈值T,为了防止精度丢失导致的巨大误差
+     * 此处，阈值计算约为meanMax与meanMin的均值
+     * @author Fang
      * @date 2019/3/26 17:13
      * @param minList
      * @param maxList
@@ -67,8 +91,8 @@ public abstract class OptimizationAlgorithm {
         double minVar = minStats.getVariance();
         double maxVar = maxStats.getVariance();
 
-        System.out.printf("min均值：%f, 方差：%f%n", minMean, minVar);
-        System.out.printf("max均值：%f, 方差：%f%n", maxMean, maxVar);
+        logger.info("min均值：{}, 方差：{}", minMean, minVar);
+        logger.info("max均值：{}, 方差：{}", maxMean, maxVar);
 
         return (minMean+maxMean)/2;
 
@@ -77,7 +101,7 @@ public abstract class OptimizationAlgorithm {
 
     /**
      * @Description 返回一元二次方程较小的根
-     * @author Fcat
+     * @author Fang
      * @date 2019/3/26 17:07
      * @param A
      * @param B
