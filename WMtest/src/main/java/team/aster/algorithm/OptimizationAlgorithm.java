@@ -20,6 +20,7 @@ public abstract class OptimizationAlgorithm {
     public abstract ArrayList<Double> getModifiedColumn();
 
 
+
     /**
      * 获取ref值，供sigmoid函数使用
      * @author Fang
@@ -29,40 +30,20 @@ public abstract class OptimizationAlgorithm {
      * @update Kun-提出中位数分割法
      */
     public static double getRefValue(ArrayList<Double> colValues, double secretKey){
-//        DescriptiveStatistics stats = new DescriptiveStatistics();
-//        //把数组的值添加到统计量中
-//        colValues.forEach(stats::addValue);
-//        double mean = stats.getMean();
-//        double varianceSqrt = Math.sqrt(stats.getVariance());
-//        double ref = mean + secretKey*varianceSqrt;
-
-        ArrayList<Double> tmpList = new ArrayList<>(colValues);
-        tmpList.sort(Comparator.naturalOrder());
-        double mid = tmpList.get(colValues.size()/2);
-
-//        if (varianceSqrt>mean) {
-//
-//            // 若数据集过于分散，则进行均化处理
-//            double sum = 0;
-//            for (double i:colValues){
-//                sum += getSigmoid(i, ref);
-//            }
-//            logger.info("标准差大于均值，返回{}", sum/(double)colValues.size());
-//            return sum/(double)colValues.size();
-//        }
-        //logger.info("标准差小于均值，返回{}", mid);
-        return mid;
-
+        //把数组的值添加到统计量中
+        logger.info("ref为{}",PatternSearch.OREF);
+        return PatternSearch.OREF;
     }
 
-
     public static double getOHidingValue(ArrayList<Double> colValues, double secretKey){
+        double ref = getRefValue(colValues, secretKey);
         double sum = 0.0;
         for (double i:colValues){
-            sum += getSigmoid(i, PatternSearch.OREF);
+            sum += getSigmoid(i, ref);
         }
         return sum/(double)colValues.size();
     }
+
 
     private static double getSigmoid(double i, double oref) {
         double ALPHA = 8;
@@ -88,11 +69,10 @@ public abstract class OptimizationAlgorithm {
 
         double minMean = minStats.getMean();
         double maxMean = maxStats.getMean();
-        double minVar = minStats.getVariance();
-        double maxVar = maxStats.getVariance();
-
-        logger.info("min均值：{}, 方差：{}", minMean, minVar);
-        logger.info("max均值：{}, 方差：{}", maxMean, maxVar);
+//        double minVar = minStats.getVariance();
+//        double maxVar = maxStats.getVariance();
+//        logger.info("min均值：{}, 方差：{}", minMean, minVar);
+//        logger.info("max均值：{}, 方差：{}", maxMean, maxVar);
 
         return (minMean+maxMean)/2;
 
@@ -103,9 +83,6 @@ public abstract class OptimizationAlgorithm {
      * @Description 返回一元二次方程较小的根
      * @author Fang
      * @date 2019/3/26 17:07
-     * @param A
-     * @param B
-     * @param C
      * @return double
      */
     private static double getSmallerRootForQuad(double A, double B, double C){

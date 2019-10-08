@@ -1,24 +1,23 @@
 package team.aster.processor;
 
-import gui.InstantInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import team.aster.algorithm.Divider;
-import team.aster.algorithm.GenericOptimization;
 import team.aster.algorithm.OptimizationAlgorithm;
 import team.aster.algorithm.PatternSearch;
 import team.aster.model.DatasetWithPK;
 import team.aster.model.PartitionedDataset;
 import team.aster.model.WaterMark;
 import team.aster.model.WatermarkException;
-import team.aster.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * 基于最优化算法的水印编码器
+ */
 public class OptimEncoder extends IEncoderNumericImpl {
-    private static Logger logger = LoggerFactory.getLogger(OptimDecoder.class);
+    private static Logger logger = LoggerFactory.getLogger(OptimEncoder.class);
 
     private ArrayList<Double> minList = new ArrayList<>();
     private ArrayList<Double> maxList = new ArrayList<>();
@@ -90,21 +89,43 @@ public class OptimEncoder extends IEncoderNumericImpl {
 
     /**
      * @Description 对划分好的数据集嵌入水印，直接修改划分里的数据集
-     * @author Fcat
+     * @author Fang
      * @date 2019/3/24 16:47
      * @param partitionedDataset    整个划分好的数据集
      * @param watermark	    要嵌入的水印串
      */
     private double encodeAllBits(PartitionedDataset partitionedDataset, ArrayList<Integer> watermark, double secretKey){
-        System.out.println("开始嵌入水印所有位");
+        logger.info("开始嵌入水印所有位");
         Map<Integer, ArrayList<ArrayList<String>>> datasetWithIndex = partitionedDataset.getPartitionedDataset();
         final int wmLength = watermark.size();
+
+
+        ArrayList<Double> all = new ArrayList<>();
+        datasetWithIndex.forEach((k,v)->{
+            for(ArrayList<String> row: v){
+                // 只取一列数据
+                double value = Double.valueOf(row.get(COL_INDEX));
+                all.add(value);
+            }
+        });
+        all.sort(Double::compareTo);
+
+        int start = ((int)(20+secretKey*10))*all.size()/100;
+        int end = ((int)(80-secretKey*10))*all.size()/100;
+        double mean = 0d;
+        ArrayList<Double> cutCol = new ArrayList<>();
+        for(int i=start;i<end;i++){
+            cutCol.add(all.get(i));
+            mean+=all.get(i)/(end-start);
+        }
+        PatternSearch.OREF = mean;
+
 
         datasetWithIndex.forEach((k,v)->{
             int index = k%wmLength;
             encodeSingleBit(v, secretKey, watermark.get(index));
         });
-        double threshold = GenericOptimization.calcOptimizedThreshold(minList, maxList);
+        double threshold = OptimizationAlgorithm.calcOptimizedThreshold(minList, maxList);
         logger.debug("阈值为: {}", threshold);
         return threshold;
     }
@@ -113,7 +134,7 @@ public class OptimEncoder extends IEncoderNumericImpl {
 
     /**
      * @Description 对水印的一个bit嵌入一个划分当中，直接对划分进行修改
-     * @author Fcat
+     * @author Fang
      * @date 2019/3/24 1:18
      * @param partition	 一个划分
      * @param secretKey	水印对应的bit位
@@ -138,12 +159,12 @@ public class OptimEncoder extends IEncoderNumericImpl {
         switch (bit){
             case 0:
                 tmp = optimization.minimizeByHidingFunction(colValues,
-                        OptimizationAlgorithm.getHidingValue(colValues, secretKey), varLowerBound, varUpperBound);
+                        OptimizationAlgorithm.getRefValue(colValues, secretKey), varLowerBound, varUpperBound);
                 minList.add(tmp);
                 break;
             case 1:
                 tmp = optimization.maximizeByHidingFunction(colValues,
-                        OptimizationAlgorithm.getHidingValue(colValues, secretKey), varLowerBound, varUpperBound);
+                        OptimizationAlgorithm.getRefValue(colValues, secretKey), varLowerBound, varUpperBound);
                 maxList.add(tmp);
                 break;
             default:
@@ -169,6 +190,8 @@ public class OptimEncoder extends IEncoderNumericImpl {
                 break;
             case DOUBLE:
                 placeholder = "%."+len+"f";
+                break;
+            default:
                 break;
         }
 

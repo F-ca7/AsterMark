@@ -3,15 +3,17 @@ package team.aster.processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import team.aster.algorithm.Divider;
-import team.aster.algorithm.GenericOptimization;
+import team.aster.algorithm.OptimizationAlgorithm;
+import team.aster.algorithm.PatternSearch;
 import team.aster.model.DatasetWithPK;
 import team.aster.model.PartitionedDataset;
 import team.aster.model.StoredKey;
-import team.aster.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.Map;
-
+/**
+ * 基于最优化算法的水印解码器
+ */
 public class OptimDecoder implements IDecoder {
     private static Logger logger = LoggerFactory.getLogger(OptimDecoder.class);
 
@@ -24,7 +26,6 @@ public class OptimDecoder implements IDecoder {
     private int minLength;
     //先只对一列进行嵌入水印解码，这里是最后一列FLATLOSE 转让盈亏(已扣税)
     //但是由于列之间的约束，这里还是不太科学
-    // todo 这个地方应该自定义
     private int COL_INDEX;
 
     public int getPartitionCount() {
@@ -87,6 +88,26 @@ public class OptimDecoder implements IDecoder {
         int[] ones = new int[wmLength];
         int[] zeros = new int[wmLength];
         Map<Integer, ArrayList<ArrayList<String>>> map = partitionedDataset.getPartitionedDataset();
+
+        ArrayList<Double> all = new ArrayList<>();
+        map.forEach((k,v)->{
+            for(ArrayList<String> row: v){
+                // 只取一列数据
+                double value = Double.valueOf(row.get(COL_INDEX));
+                all.add(value);
+            }
+        });
+        all.sort(Double::compareTo);
+        // 使用secretKey进行映射
+        int start = ((int)(20+secretKey*10))*all.size()/100;
+        int end = ((int)(80-secretKey*10))*all.size()/100;
+        double mean = 0d;
+
+        for(int i=start;i<end;i++){
+            mean+=all.get(i)/(end-start);
+        }
+        PatternSearch.OREF = mean;
+
         map.forEach((k, v)->{
             if(v.size() >= minLength){
                 ArrayList<Double> colValues = new ArrayList<>();
@@ -94,7 +115,7 @@ public class OptimDecoder implements IDecoder {
                 v.forEach(strValues->{
                     colValues.add(Double.parseDouble(strValues.get(COL_INDEX)));
                 });
-                double hidingValue = GenericOptimization.getOHidingValue(colValues, secretKey);
+                double hidingValue = OptimizationAlgorithm.getOHidingValue(colValues, secretKey);
                 if (hidingValue > this.threshold) {
                     ones[index]++;
                 } else{
@@ -106,11 +127,14 @@ public class OptimDecoder implements IDecoder {
         //据ones和zeros生成水印
         StringBuilder wm = new StringBuilder();
         for(int i=0;i<wmLength;i++){
-            if(ones[i]>zeros[i]){
+            if(ones[i] > zeros[i]){
+                logger.info("第{}位有{}个0，{}个1，解得1", i, zeros[i], ones[i]);
                 wm.append("1");
             }else if(ones[i]<zeros[i]){
+                logger.info("第{}位有{}个0，{}个1，解得0", i, zeros[i], ones[i]);
                 wm.append("0");
             }else{
+                logger.info("第{}位有{}个0，{}个1，解得x", i, zeros[i], ones[i]);
                 wm.append("x");
             }
         }

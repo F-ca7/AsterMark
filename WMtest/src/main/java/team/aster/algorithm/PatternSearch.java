@@ -3,9 +3,8 @@ package team.aster.algorithm;
 import java.util.ArrayList;
 import java.util.Collections;
 /**
- *
+ * 模式搜索--最优化
  * @author kun
- *
  */
 public final class PatternSearch extends OptimizationAlgorithm{
 
@@ -21,10 +20,15 @@ public final class PatternSearch extends OptimizationAlgorithm{
     private ArrayList<Double> changeRecord;//增向量
     private double ALPHA = 8;//sigmoid函数参数
     private double REF;//临时sigmoid函数参数
-    static double OREF;//sigmoid隐藏函数参数
+    public static double OREF;//sigmoid隐藏函数参数
     private boolean IS_MAX;
     private double exp = -0.00001;
 
+    /**
+     * 设置上下界
+     * @param lower 下界
+     * @param upper 上界
+     */
     private void setBound(double lower,double upper) {
         UPPER_BOUND = upper;
         LOWER_BOUND = lower;
@@ -35,12 +39,16 @@ public final class PatternSearch extends OptimizationAlgorithm{
         REF = ref;
         OREF = ref;
     }
+
     private double getSigmoid(double x) {
         return (1.0-1.0/(1+Math.exp(ALPHA*(x-REF))));
+
     }
+
     private void setNextStepLength() {
         STEP_LENGTH = STEP_LENGTH * DECAY_RATE;
     }
+
     private boolean cmp(double x,double y) {
         if(IS_MAX) {
             return (x-y)>exp;
@@ -66,7 +74,7 @@ public final class PatternSearch extends OptimizationAlgorithm{
         int len = tmp.size();
         for(int i=0;i<len;i++) {
             double valueI = tmp.get(i);
-            if(cmp(getSigmoid(valueI+STEP_LENGTH),getSigmoid(valueI))&&changeRecord.get(i)<UPPER_BOUND) {
+            if(cmp(getSigmoid(valueI+STEP_LENGTH), getSigmoid(valueI)) && changeRecord.get(i)<UPPER_BOUND) {
                 tmp.set(i, valueI+STEP_LENGTH);
                 changeRecord.set(i, changeRecord.get(i)+STEP_LENGTH);
             }else if(cmp(getSigmoid(valueI-STEP_LENGTH),getSigmoid(valueI))&&changeRecord.get(i)>LOWER_BOUND) {
@@ -101,8 +109,8 @@ public final class PatternSearch extends OptimizationAlgorithm{
                 break;
             }
             tmp.set(i, recordState.get(i)+ACCURATE*(recordState.get(i)-initState.get(i)));
-            x+=getSigmoid(tmp.get(i));
-            y+=getSigmoid(recordState.get(i));
+            x += getSigmoid(tmp.get(i));
+            y += getSigmoid(recordState.get(i));
             tmpChange.set(i, tmpChange.get(i)+ACCURATE*(recordState.get(i)-initState.get(i)));
         }
 
@@ -131,19 +139,17 @@ public final class PatternSearch extends OptimizationAlgorithm{
     }
 
 
-
-
     public PatternSearch() {
 
     }
 
     /**
      * 获取最大最优化后的隐藏函数均值meanMax
-     * @param colValues
-     * @param ref
-     * @param lower
-     * @param upper
-     * @return
+     * @param colValues 一列数据
+     * @param ref 参考值
+     * @param lower 修改变化下界
+     * @param upper 修改变化上界
+     * @return 隐藏函数最大值
      */
     @Override
     public double maximizeByHidingFunction(ArrayList<Double> colValues, double ref, double lower, double upper) {
@@ -163,11 +169,11 @@ public final class PatternSearch extends OptimizationAlgorithm{
 
     /**
      * 获取最小最优化后的隐藏函数均值meanMin
-     * @param colValues
-     * @param ref
-     * @param lower
-     * @param upper
-     * @return
+     * @param colValues 一列数据
+     * @param ref 参考值
+     * @param lower 修改变化下界
+     * @param upper 修改变化上界
+     * @return 隐藏函数最小值
      */
     @Override
     public double minimizeByHidingFunction(ArrayList<Double> colValues, double ref, double lower, double upper) {
