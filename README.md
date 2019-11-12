@@ -61,14 +61,17 @@ set **γ**，Statistics **Xmax**, **Xmin**, Minimum member number **ξ**
 
 Output: Data set **Si+Δi\***
 
-if ( \|**Si**\|\<**ξ** ) then return **Si**
-if ( **bi**==1 ) then
-maximize( **Θγ(Si+Δi)** ) subject to **Gi**
-insert Θγ**(Si+Δi\***) into **Xmax**
+
+```
+if ( |Si|\<ξ ) then return Si
+if ( bi==1 ) then
+maximize( Θγ(Si+Δi) ) subject to Gi
+insert Θγ(Si+Δi) into Xmax
 else
-minimize( **Θγ(Si+Δi)** ) subject to **Gi**
-insert Θγ**(Si+Δi\***) into **Xmin**
-return **Si+Δi\***
+minimize( Θγ(Si+Δi) ) subject to Gi
+insert Θγ(Si+Δi) into Xmin
+return Si+Δi
+```
 
 对于隐藏函数的选取，我们使用
 
@@ -161,4 +164,27 @@ for j from 0 to l-1
    		Wd[j]='x'
 return Wd
 ```
+
+## 软件界面截图
+
+---------------
+
+- 连接主数据库
+
+![](https://s2.ax1x.com/2019/11/12/MlovYq.png)
+
+- 数据表展示
+![](https://s2.ax1x.com/2019/11/12/Mloxf0.png)
+
+- 嵌入水印
+![](https://s2.ax1x.com/2019/11/12/MlTplT.png)
+
+- 嵌入结果展示
+![](https://s2.ax1x.com/2019/11/12/MlTCXF.png)
+
+- 提取水印
+![](https://s2.ax1x.com/2019/11/12/MlTk79.png)
+
+- 提取结果展示
+![](https://s2.ax1x.com/2019/11/12/Ml7P8P.png)
 
