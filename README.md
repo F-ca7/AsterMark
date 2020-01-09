@@ -85,11 +85,11 @@ return Si+Δi
 
 Input: Partition **origin_partition**, Bit **bit**, Evaluation function
 **sigmoid()**, Length of step **step_length**, Rate of decay **decay_rate**,
-Accurate **accurate**, Number of turns **turn_num**
+accelerate **accelerate**, Number of turns **turn_num**
 
 Output: Partition **new_partition**
 while step_length \> precision,
-**accurate_direction** = [0,0,0,...,0]
+**accelerate_direction** = [0,0,0,...,0]
 
 ```
 searchByAxis:
@@ -98,17 +98,17 @@ while turn < turn_num
  new_data = origin_data + step_length
  if sigmoid(new_data) > sigmoid(origin_data) and bit == 1
  origin_data = new_data
- accurate_direction[origin_data's index] = 1
- if sigmoid(new_data) < sigmoid**(origin_data) and bit == 0
+ accelerate_direction[origin_data's index] = 1
+ if sigmoid(new_data) < sigmoid(origin_data) and bit == 0
  origin_data = new_data
- accurate_direction[origin_data's index] = 1
+ accelerate_direction[origin_data's index] = 1
  step_length = step_length\decay_rate
  turn++
 ```
 
 ```
 searchByPattern
- new_partition = origin_partition + accurate\accurate_direction
+ new_partition = origin_partition + accelerate\accelerate_direction
  if sigmoid(new_partition) > sigmoid(origin_partition) and bit = 1
  	origin_partition = new_partition
  if sigmoid(new_partition) > sigmoid(origin_partition) andbit = 0
