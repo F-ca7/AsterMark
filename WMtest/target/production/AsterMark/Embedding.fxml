@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="780.0" minWidth="1250.0" prefHeight="780.0" prefWidth="1250.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.EmbeddingController">
+   <children>
+       <!--TableList-->
+       <ListView layoutY="43.0" prefHeight="737.0" prefWidth="180.0" />
+
+       <!--DataTable-->
+      <TableView fx:id="tbv_dataTable" layoutX="193.0" layoutY="200.0" prefHeight="538.0" prefWidth="1057.0">
+        <columns>
+        </columns>
+      </TableView>
+      <HBox layoutX="212.0" layoutY="75.0" prefHeight="30.0" prefWidth="1000.0">
+         <children>
+            <ComboBox fx:id="chb_embeddingColumnName" prefHeight="30.0" prefWidth="125.0" />
+            <ComboBox fx:id="chb_keyColumnName" prefHeight="30.0" prefWidth="125.0" />
+            <ComboBox fx:id="chb_dataType" prefHeight="30.0" prefWidth="125.0" />
+            <ComboBox fx:id="chb_embeddingMethod" prefHeight="30.0" prefWidth="125.0" />
+            <ComboBox fx:id="chb_precision" prefHeight="30.0" prefWidth="125.0" />
+            <TextField fx:id="txtf_upperBound" prefHeight="30.0" prefWidth="125.0" />
+            <TextField fx:id="txtf_lowerBound" prefHeight="30.0" prefWidth="125.0" />
+            <TextField fx:id="txtf_embeddingMessage" prefHeight="30.0" prefWidth="125.0" />
+         </children>
+      </HBox>
+      <HBox layoutX="212.0" layoutY="45.0" prefHeight="30.0" prefWidth="1000.0">
+         <children>
+            <Label alignment="CENTER" contentDisplay="CENTER" lineSpacing="12.0" prefHeight="30.0" prefWidth="125.0" style="-fx-border-width: 1; -fx-border-color: #000;" text="待嵌入字段名" textAlignment="CENTER" wrapText="true">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+               <font>
+                  <Font size="17.0" />
+               </font>
+            </Label>
+            <Label alignment="CENTER" prefHeight="30.0" prefWidth="125.0" style="-fx-border-width: 1; -fx-border-color: #000;" text="指定主键字段" textAlignment="CENTER" wrapText="true">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+               <font>
+                  <Font size="17.0" />
+               </font>
+            </Label>
+            <Label alignment="CENTER" prefHeight="30.0" prefWidth="125.0" style="-fx-border-width: 1; -fx-border-color: #000;" text="数据类型" textAlignment="CENTER" wrapText="true">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+               <font>
+                  <Font size="17.0" />
+               </font>
+            </Label>
+            <Label alignment="CENTER" prefHeight="30.0" prefWidth="125.0" style="-fx-border-width: 1; -fx-border-color: #000;" text="嵌入方式" textAlignment="CENTER" wrapText="true">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+               <font>
+                  <Font size="17.0" />
+               </font>
+            </Label>
+            <Label alignment="CENTER" prefHeight="30.0" prefWidth="125.0" style="-fx-border-width: 1; -fx-border-color: #000;" text="精度" textAlignment="CENTER" wrapText="true">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+               <font>
+                  <Font size="17.0" />
+               </font>
+            </Label>
+            <Label alignment="CENTER" prefHeight="30.0" prefWidth="125.0" style="-fx-border-width: 1; -fx-border-color: #000;" text="变化范围上界" textAlignment="CENTER" wrapText="true">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+               <font>
+                  <Font size="17.0" />
+               </font>
+            </Label>
+            <Label alignment="CENTER" prefHeight="30.0" prefWidth="125.0" style="-fx-border-width: 1; -fx-border-color: #000;" text="变化范围下界" textAlignment="CENTER" wrapText="true">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin><font>
+               <Font size="17.0" />
+            </font>
+            </Label>
+            <Label alignment="CENTER" prefHeight="30.0" prefWidth="125.0" style="-fx-border-width: 1; -fx-border-color: #000;" text="嵌入信息" textAlignment="CENTER" wrapText="true">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin><font>
+               <Font size="17.0" />
+            </font>
+            </Label>
+
+
+         </children></HBox>
+
+<!--      <Button layoutX="5.0" layoutY="5.0" mnemonicParsing="false" onAction="#jumpToMainPage" text="返回">-->
+<!--         <font>-->
+<!--            <Font name="System Bold" size="15.0" />-->
+<!--         </font>-->
+<!--      </Button>-->
+
+      <Label fx:id="lbl_databaseName" alignment="CENTER" contentDisplay="CENTER" layoutY="55.0" maxWidth="180.0" prefHeight="40.0" prefWidth="180.0" text="数据库名">
+         <font>
+            <Font size="31.0" />
+         </font>
+      </Label>
+      <ListView fx:id="lstv_dataTable" layoutX="0.0" layoutY="120.0" prefHeight="660.0" prefWidth="180.0" />
+      <Button fx:id="btn_beginEmbedding" layoutX="1080.0" layoutY="134.0" mnemonicParsing="false" onAction="#beginEmbedding" prefHeight="40.0" prefWidth="140.0" style="-fx-border-radius: 10; -fx-border-width: 2; -fx-border-color: #000; -fx-background-insets: 0;" text="开始嵌入">
+         <font>
+            <Font name="System Bold" size="21.0" />
+         </font></Button>
+      <Button fx:id="btn_prePage" layoutX="953.0" layoutY="749.0" mnemonicParsing="false" onAction="#prePage" prefHeight="30.0" prefWidth="55.0" text="&lt;" />
+      <Button fx:id="btn_nextPage" layoutX="1123.0" layoutY="749.0" mnemonicParsing="false" onAction="#nextPage" prefHeight="30.0" prefWidth="55.0" text="&gt;" />
+      <Label fx:id="lbl_pageNumber" layoutX="1044.0" layoutY="752.0" text="第 页">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <ProgressIndicator fx:id="pgs_indicator" layoutX="658.0" layoutY="439.0" prefHeight="88.0" prefWidth="124.0" progress="0.0" />
+      <ImageView fitHeight="509.0" fitWidth="499.0" layoutX="471.0" layoutY="225.0" opacity="0.2" pickOnBounds="true" preserveRatio="true">
+      <image>
+<!--         <Image url="@img/aster_icon.png" />-->
+      </image></ImageView>
+   </children>
+</AnchorPane>

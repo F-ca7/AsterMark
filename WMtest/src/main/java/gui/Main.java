@@ -17,7 +17,7 @@ public class Main extends Application {
             primaryStage.setTitle("连接到数据库");
             primaryStage.setScene(new Scene(root, 448, 423));
             primaryStage.setResizable(false);
-            primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/img/aster_icon.png")));
+            //primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/img/aster_icon.png")));
             primaryStage.show();
         }catch (Exception e){
             e.printStackTrace();

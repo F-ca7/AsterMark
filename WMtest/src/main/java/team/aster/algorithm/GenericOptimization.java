@@ -11,6 +11,7 @@ public final class GenericOptimization extends OptimizationAlgorithm{
 
 
     //todo 临时模拟
+    @Override
     public double maximizeByHidingFunction(ArrayList<Double> colValues, double ref, double lower, double upper){
         RandomData randomData = new RandomDataImpl();
 
@@ -18,6 +19,7 @@ public final class GenericOptimization extends OptimizationAlgorithm{
     }
 
     //todo 临时模拟
+    @Override
     public double minimizeByHidingFunction(ArrayList<Double> colValues, double ref, double lower, double upper){
         RandomData randomData = new RandomDataImpl();
 

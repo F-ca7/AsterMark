@@ -27,7 +27,6 @@ public abstract class OptimizationAlgorithm {
      * @date 2019/3/26 16:15
      * @param colValues	一个字段的所有值
      * @param secretKey	秘参c
-     * @update Kun-提出中位数分割法
      */
     public static double getRefValue(ArrayList<Double> colValues, double secretKey){
         //把数组的值添加到统计量中
@@ -46,7 +45,7 @@ public abstract class OptimizationAlgorithm {
 
 
     private static double getSigmoid(double i, double oref) {
-        double ALPHA = 8;
+        final double ALPHA = 8;
         return (1.0-1.0/(1+Math.exp(ALPHA*(i-oref))));
     }
 

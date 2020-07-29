@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="500.0" minWidth="720.0" prefHeight="500.0" prefWidth="720.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.ImportDataSourceController">
+    <children>
+<!--        <Button layoutX="5.0" layoutY="5.0" mnemonicParsing="false" onAction="#jumpToMainPage" text="返回">-->
+<!--            <font>-->
+<!--                <Font name="System Bold" size="18.0" />-->
+<!--            </font>-->
+<!--        </Button>-->
+        <Button layoutX="100.0" layoutY="250.0" mnemonicParsing="false" onAction="#getDataFromDataBase" prefHeight="160.0" prefWidth="200.0" text="从数据库中导入">
+            <font>
+                <Font name="System Bold" size="20.0" />
+            </font></Button>
+        <Button layoutX="400.0" layoutY="250.0" mnemonicParsing="false" onAction="#getDataFromFile" prefHeight="160.0" prefWidth="200.0" text="从文件中导入">
+            <font>
+                <Font name="System Bold" size="20.0" />
+            </font></Button>
+        <Label layoutX="100.0" layoutY="69.0" text="导入数据源">
+            <font>
+                <Font name="System Bold" size="48.0" />
+            </font></Label>
+        <Button fx:id="btn_helpDoc" graphicTextGap="0.0" layoutX="590.0" layoutY="60.0" mnemonicParsing="false" prefHeight="70.0" prefWidth="70.0" style="-fx-border-radius: 35; -fx-background-insets: 0; -fx-background-radius: 35; -fx-border-width: 5; -fx-border-insets: 0; -fx-border-color: #000;" text="?">
+            <font>
+                <Font name="System Bold" size="28.0" />
+            </font></Button>
+    </children>
+</AnchorPane>

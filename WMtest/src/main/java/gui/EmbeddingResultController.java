@@ -64,13 +64,13 @@ public class EmbeddingResultController extends Stage {
     }
 
     private void jumpToChoosingPage(javafx.event.ActionEvent event) throws IOException {
-        Parent Operation_Parent = FXMLLoader.load(getClass().getResource("/ChoosingFunction.fxml"));
-        Scene Operation_Creating_Scene = new Scene(Operation_Parent, 720, 500);
-        Stage CreateOperation_Stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        CreateOperation_Stage.setResizable(false);
-        CreateOperation_Stage.setTitle("功能选择");
-        CreateOperation_Stage.hide();
-        CreateOperation_Stage.setScene(Operation_Creating_Scene);
-        CreateOperation_Stage.show();
+        Parent operationParent = FXMLLoader.load(getClass().getResource("/ChoosingFunction.fxml"));
+        Scene operationCreatingScene = new Scene(operationParent, 720, 500);
+        Stage createOperationStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        createOperationStage.setResizable(false);
+        createOperationStage.setTitle("功能选择");
+        createOperationStage.hide();
+        createOperationStage.setScene(operationCreatingScene);
+        createOperationStage.show();
     }
 }

@@ -82,7 +82,7 @@ public class LoginPageController extends Stage{
         CreateOperation_Stage.show();
     }
 
-    public boolean checkInputRight(){
+    private boolean checkInputRight(){
         if("".equals(txtf_ipAddress.getText().trim())){
             InstantInfo.showErrorMessage("连接IP地址尚未填写！");
             return false;

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="251.0" prefWidth="502.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.SetCSVHeadController">
+    <children>
+        <Label fx:id="lbl_numberEmbeddingInfo" layoutX="59.0" layoutY="61.0" text="CSV文件的第一行是否为字段名称？">
+            <font>
+                <Font name="System Bold" size="24.0" />
+            </font>
+        </Label>
+        <Button layoutX="97.0" layoutY="168.0" mnemonicParsing="false" onAction="#chooseYes" text="是">
+            <font>
+                <Font name="System Bold" size="18.0" />
+            </font>
+        </Button>
+      <Button layoutX="347.0" layoutY="168.0" mnemonicParsing="false" onAction="#chooseNo" text="否">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Button>
+    </children>
+</AnchorPane>

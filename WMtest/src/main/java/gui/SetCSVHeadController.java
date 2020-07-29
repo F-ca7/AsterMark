@@ -30,14 +30,14 @@ public  class SetCSVHeadController{
         parseCSVtoDatasetInDb(subDbController, InstantInfo.getFile(), InstantInfo.isIsFirst());
         InstantInfo.setSubDbController(subDbController);
 
-        Parent Operation_Parent = FXMLLoader.load(getClass().getResource(fxmlName));
-        Scene Operation_Creating_Scene = new Scene(Operation_Parent, width,height);
-        Stage CreateOperation_Stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        CreateOperation_Stage.setResizable(false);
-        CreateOperation_Stage.setTitle(title);
-        CreateOperation_Stage.hide();
-        CreateOperation_Stage.setScene(Operation_Creating_Scene);
-        CreateOperation_Stage.show();
+        Parent operationParent = FXMLLoader.load(getClass().getResource(fxmlName));
+        Scene operationCreatingScene = new Scene(operationParent, width,height);
+        Stage createOperationStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        createOperationStage.setResizable(false);
+        createOperationStage.setTitle(title);
+        createOperationStage.hide();
+        createOperationStage.setScene(operationCreatingScene);
+        createOperationStage.show();
     }
     private void parseCSVtoDatasetInDb(SubDbController subDbController, String filePath , boolean withHeader) {
         ArrayList<String> tableNames = subDbController.getTableNameList();

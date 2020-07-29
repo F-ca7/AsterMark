@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="326.0" minWidth="400.0" prefHeight="326.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8.0.172-ea"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="gui.ConnectController">
+   <children>
+      <Button fx:id="btn_jumpTest" layoutX="27.0" layoutY="330.0" mnemonicParsing="false" onAction="#jumpToChoosingPage" prefHeight="34.0" prefWidth="71.0" text="连接测试" AnchorPane.bottomAnchor="19.0" />
+      <Button layoutX="241.0" layoutY="277.0" mnemonicParsing="false" prefHeight="34.0" prefWidth="58.0" text="确定" AnchorPane.bottomAnchor="19.0" />
+      <HBox layoutX="23.0" layoutY="25.0" prefHeight="34.0" prefWidth="353.0" AnchorPane.topAnchor="25.0">
+         <children>
+            <Label prefHeight="34.0" prefWidth="99.0" style="-fx-background-color: transparent;" text="主机名或ip地址：" />
+            <TextField fx:id="tf_conn_ip" prefHeight="35.0" prefWidth="252.0" text="localhost" />
+         </children></HBox>
+      <HBox layoutX="23.0" layoutY="76.0" prefHeight="34.0" prefWidth="353.0">
+         <children>
+            <Label prefHeight="34.0" prefWidth="99.0" style="-fx-background-color: transparent;" text="端口：" />
+            <TextField fx:id="tf_conn_port" prefHeight="34.0" prefWidth="96.0" text="3306" />
+         </children>
+      </HBox>
+      <HBox layoutX="23.0" layoutY="129.0" prefHeight="34.0" prefWidth="353.0">
+         <children>
+            <Label prefHeight="34.0" prefWidth="99.0" style="-fx-background-color: transparent;" text="用户名：" />
+            <TextField fx:id="tf_conn_username"  prefHeight="34.0" prefWidth="151.0" text="root" />
+         </children>
+      </HBox>
+      <HBox layoutX="23.0" layoutY="181.0" prefHeight="34.0" prefWidth="353.0">
+         <children>
+            <Label prefHeight="34.0" prefWidth="99.0" style="-fx-background-color: transparent;" text="密码：" />
+            <PasswordField fx:id="tf_conn_pwd" prefHeight="34.0"  prefWidth="150.0" />
+         </children>
+      </HBox>
+      <Separator layoutX="23.0" layoutY="250.0" prefHeight="0.0" prefWidth="353.0" />
+      <Button layoutX="311.0" layoutY="273.0" mnemonicParsing="false" prefHeight="34.0" prefWidth="58.0" text="取消" AnchorPane.bottomAnchor="19.0" />
+   </children>
+</AnchorPane>
