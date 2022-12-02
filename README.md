@@ -1,3 +1,5 @@
+演示视频：https://www.bilibili.com/video/BV1Ue411N7f2/
+
 为研究与解决关系型数据库中的数据版权问题，我&Kun设计并开发了一款名为“AsterMark”、用于嵌入/提取关系型数据库水印的桌面应用软件。（获得[第八届中国软件杯一等奖](http://www.cnsoftbei.com/plus/view.php?aid=452)）
 
 1. 通过参考相关学术文献，对于数值型、文本型两大类型数据实现了共五种水印嵌入提取算法；
